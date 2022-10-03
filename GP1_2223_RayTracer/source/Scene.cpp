@@ -62,13 +62,13 @@ namespace dae {
 				return true;
 			}
 		}
-		/*for (int i = 0; i < m_PlaneGeometries.size(); ++i)
+		for (int i = 0; i < m_PlaneGeometries.size(); ++i)
 		{
 			if (GeometryUtils::HitTest_Plane(m_PlaneGeometries[i], ray))
 			{
 				return true;
 			}
-		}*/
+		}
 		return false;
 	}
 
