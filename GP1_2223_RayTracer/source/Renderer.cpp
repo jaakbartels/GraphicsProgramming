@@ -32,7 +32,7 @@ void Renderer::Render(Scene* pScene) const
 
 	for (int px{}; px < m_Width; ++px)
 	{
-		for (int py{  }; py < m_Height; ++py)
+		for (int py{}; py < m_Height; ++py)
 		{
             //Ray for each pixel
             //float gradient = px / static_cast<float>(m_Width);
@@ -71,6 +71,7 @@ void Renderer::Render(Scene* pScene) const
             pScene->GetClosestHit(viewRay, closestHit);
             //Plane testPlane{ {0.f, -50.f, 0.f}, {0.f,1.f,0.f}, 0 };
             //GeometryUtils::HitTest_Plane(testPlane, viewRay, closesHit);
+			finalColor.MaxToOne();
 
 			//Update Color in Buffer
             if (closestHit.didHit)
@@ -78,20 +79,19 @@ void Renderer::Render(Scene* pScene) const
                 //const float scaled_t = (closesHit.t / 500.f);
                 //finalColor = { scaled_t, scaled_t, scaled_t };
                 finalColor = materials[closestHit.materialIndex]->Shade();
+
 	            for(unsigned long i{}; i < lights.size();++i)
 	            {
 					Vector3 directionToLight =  LightUtils::GetDirectionToLight(lights[i], closestHit.origin);
 					float mag{ directionToLight.Magnitude() };
 					directionToLight.Normalize();
 					Ray rayToLight = Ray{ closestHit.origin,directionToLight,0.0001f,mag };
-					//std::cout << px << ' ' << py << ' ' << closestHit.origin.x << "," << closestHit.origin.y << "," << closestHit.origin.z << "  " << directionToLight.x << "," << directionToLight.y << "," << directionToLight.z << '\n';
 					if(pScene->DoesHit(rayToLight))
 					{
 						finalColor *= 0.5f;
 					}
 	            }
             }
-			finalColor.MaxToOne();
 
 			m_pBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBuffer->format,
 				static_cast<uint8_t>(finalColor.r * 255),

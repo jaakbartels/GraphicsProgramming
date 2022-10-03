@@ -36,25 +36,12 @@ namespace dae
 					hitRecord.t = t;
 					hitRecord.didHit = true;
 					hitRecord.origin = ray.origin + t * ray.direction;
+					hitRecord.materialIndex = sphere.materialIndex;
 					return true;
 				}
 			}
 
 			return false;
-			////todo W1
-			//Vector3 Tc = sphere.origin - ray.origin;
-			//float Dp = Vector3::Dot(Tc, ray.direction);
-			//float Od = sqrt((Tc.Magnitude()*Tc.Magnitude()) - (Dp *Dp));
-			//float Tca = sqrt((sphere.radius * sphere.radius) - (Od * Od));
-			//float T0 = Dp - Tca;
-			//Vector3 I1 = ray.origin + T0 * ray.direction;
-			//if(sphere.radius >= Od)
-			//{
-			//	hitRecord.t = T0;
-			//	hitRecord.didHit = true;
-			//	return true;
-			//}
-			//return false;
 		}
 
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
@@ -73,9 +60,16 @@ namespace dae
 			if (dotProduct < 0)
 			{
 				float t = Vector3::Dot(plane.origin - ray.origin, plane.normal) / dotProduct;
-				hitRecord.t = t;
-				hitRecord.didHit = true;
-				return true;
+
+				if (t >= ray.min && t <= ray.max)
+				{
+					hitRecord.t = t;
+					hitRecord.didHit = true;
+					hitRecord.materialIndex = plane.materialIndex;
+					hitRecord.normal = plane.normal;
+					hitRecord.origin = ray.origin + t * ray.direction;
+					return true;
+				}
 			}
 			return false;
 		}

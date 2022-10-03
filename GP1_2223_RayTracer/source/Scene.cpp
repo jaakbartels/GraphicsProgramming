@@ -28,56 +28,28 @@ namespace dae {
 
 	void dae::Scene::GetClosestHit(const Ray& ray, HitRecord& closestHit) const
 	{
-		//todo W1
-		float smallestSizePlane{};
-		HitRecord closestHitTempPlane{};
-		int colorPlane{};
-		bool HitPlane{};
-		//todo W1
-		for (int i = 0; i < m_PlaneGeometries.size(); ++i)
+		//Check the planes
+		const size_t planeGeometriesSize{ m_PlaneGeometries.size() };
+		for (size_t i{}; i < planeGeometriesSize; ++i)
 		{
-			if (GeometryUtils::HitTest_Plane(m_PlaneGeometries[i], ray, closestHitTempPlane, false))
+			HitRecord hitInfo{};
+			GeometryUtils::HitTest_Plane(m_PlaneGeometries[i], ray, hitInfo);
+			if (hitInfo.t < closestHit.t)
 			{
-				if (smallestSizePlane > closestHitTempPlane.t || smallestSizePlane == 0)
-				{
-					smallestSizePlane = closestHitTempPlane.t;
-					colorPlane = i;
-				}
-				HitPlane = true;
+				closestHit = hitInfo;
 			}
-		}
-		if (HitPlane)
-		{
-			closestHit = HitRecord{ ray.origin + smallestSizePlane * ray.direction
-				, m_PlaneGeometries[colorPlane].normal
-				, smallestSizePlane
-				, true
-				, m_PlaneGeometries[colorPlane].materialIndex
-			};
 		}
 
-		float smallestSize{};
-		HitRecord closestHitTempBall{};
-		int colorball{};
-		bool HitBall{};
-		//todo W1
-		for (int i = 0; i < m_SphereGeometries.size(); ++i)
+		// Check the spheres
+		const size_t sphereGeometriesSize{ m_SphereGeometries.size() };
+		for (size_t i{}; i < sphereGeometriesSize; ++i)
 		{
-			if (GeometryUtils::HitTest_Sphere(m_SphereGeometries[i], ray, closestHitTempBall, false))
+			HitRecord hitInfo{};
+			GeometryUtils::HitTest_Sphere(m_SphereGeometries[i], ray, hitInfo);
+			if (hitInfo.t < closestHit.t)
 			{
-				if (smallestSize > closestHitTempBall.t || smallestSize == 0)
-				{
-					smallestSize = closestHitTempBall.t;
-					colorball = i;
-				}
-				HitBall = true;
+				closestHit = hitInfo;
 			}
-		}
-		if (HitBall)
-		{
-			closestHit = closestHitTempBall;
-			closestHit.materialIndex = m_SphereGeometries[colorball].materialIndex;
-			closestHit.origin = Vector3{ ray.origin.x + closestHit.t * ray.direction.x,ray.origin.y + closestHit.t * ray.direction.y ,ray.origin.z + closestHit.t * ray.direction.z };
 		}
 	}
 
