@@ -12,20 +12,49 @@ namespace dae
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W1
-			Vector3 Tc = sphere.origin - ray.origin;
-			float Dp = Vector3::Dot(Tc, ray.direction);
-			float Od = sqrt((Tc.Magnitude()*Tc.Magnitude()) - (Dp *Dp));
-			float Tca = sqrt((sphere.radius * sphere.radius) - (Od * Od));
-			float T0 = Dp - Tca;
-			Vector3 I1 = ray.origin + T0 * ray.direction;
-			if(sphere.radius >= Od)
+			float a { Vector3::Dot(ray.direction, ray.direction) };
+			Vector3 oDiff{ ray.origin - sphere.origin };
+			float b { 2 * Vector3::Dot(ray.direction, oDiff) };
+			float c { Vector3::Dot(oDiff, oDiff) - sphere.radius * sphere.radius};
+
+			//d is the discriminant of the equation
+			float d = b * b - 4 * a * c;
+
+			//We are only interested in full intersection (so discriminant > 0).
+			if (d > 0)
 			{
-				hitRecord.t = T0;
-				hitRecord.didHit = true;
-				return true;
+				//Use subtraction, except when t < tMin, then use addition for t.
+				float t = (-b - sqrtf(d)) / 2 / a;
+
+				if (t < ray.min)
+				{
+					t = (-b + sqrtf(d)) / 2 / a;
+				}
+
+				if (t>= ray.min && t <= ray.max)
+				{
+					hitRecord.t = t;
+					hitRecord.didHit = true;
+					hitRecord.origin = ray.origin + t * ray.direction;
+					return true;
+				}
 			}
+
 			return false;
+			////todo W1
+			//Vector3 Tc = sphere.origin - ray.origin;
+			//float Dp = Vector3::Dot(Tc, ray.direction);
+			//float Od = sqrt((Tc.Magnitude()*Tc.Magnitude()) - (Dp *Dp));
+			//float Tca = sqrt((sphere.radius * sphere.radius) - (Od * Od));
+			//float T0 = Dp - Tca;
+			//Vector3 I1 = ray.origin + T0 * ray.direction;
+			//if(sphere.radius >= Od)
+			//{
+			//	hitRecord.t = T0;
+			//	hitRecord.didHit = true;
+			//	return true;
+			//}
+			//return false;
 		}
 
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
@@ -39,14 +68,11 @@ namespace dae
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
 			//todo W1
-			float t = Vector3::Dot(plane.origin - ray.origin, plane.normal)/Vector3::Dot(ray.direction,plane.normal);
-			/*float t = (-ray.origin.x * plane.normal.x + plane.origin.x * plane.normal.x
-				- ray.origin.y * plane.normal.y + plane.origin.y * plane.normal.y
-				- ray.origin.z * plane.normal.z + plane.origin.z * plane.normal.z)
-				/ (ray.direction.x * plane.normal.x + ray.direction.y * plane.normal.y + ray.direction.z * plane.normal.z);*/
-			const float dotProduct{ Vector3::Dot(plane.normal, ray.direction) };
+			const float dotProduct{ Vector3::Dot(ray.direction, plane.normal) };
+
 			if (dotProduct < 0)
 			{
+				float t = Vector3::Dot(plane.origin - ray.origin, plane.normal) / dotProduct;
 				hitRecord.t = t;
 				hitRecord.didHit = true;
 				return true;
