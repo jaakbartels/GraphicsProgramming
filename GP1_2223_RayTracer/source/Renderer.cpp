@@ -73,7 +73,7 @@ void Renderer::Render(Scene* pScene) const
 	            }
             }
 
-			finalColor.MaxToOne();
+			//finalColor.MaxToOne();
 			//Update Color in Buffer
 			m_pBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBuffer->format,
 				static_cast<uint8_t>(finalColor.r * 255),

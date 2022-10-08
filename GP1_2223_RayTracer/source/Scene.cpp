@@ -206,6 +206,7 @@ namespace dae {
 
 		//Light
 		AddPointLight({ 0.f, 5.f, 5.f }, 25.f, colors::White);
+		AddPointLight({ 0.f, 2.5f, -5.f }, 25.f, colors::White);
 	}
 #pragma endregion
 }
