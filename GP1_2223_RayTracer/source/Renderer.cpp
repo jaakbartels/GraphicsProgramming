@@ -67,7 +67,8 @@ void Renderer::Render(Scene* pScene) const
 					float mag{ directionToLight.Magnitude() };
 					directionToLight.Normalize();
 					float lambertVal = Vector3::Dot(closestHit.normal, directionToLight);
-					if(lambertVal >0.f)
+					Ray rayToLight = Ray{ closestHit.origin,directionToLight,0.0001f,mag };
+					if(lambertVal >0.f && !pScene->DoesHit(rayToLight))
 					{
 						finalColor += LightUtils::GetRadiance(lights[i], closestHit.origin) * lambertVal * material->Shade(closestHit,-directionToLight,viewRay.direction);
 					}
