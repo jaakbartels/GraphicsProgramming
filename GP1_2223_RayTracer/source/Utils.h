@@ -37,6 +37,7 @@ namespace dae
 					hitRecord.didHit = true;
 					hitRecord.origin = ray.origin + t * ray.direction;
 					hitRecord.materialIndex = sphere.materialIndex;
+					hitRecord.normal = (hitRecord.origin - sphere.origin).Normalized();
 					return true;
 				}
 			}
