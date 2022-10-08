@@ -26,13 +26,18 @@ Renderer::Renderer(SDL_Window * pWindow) :
 
 void Renderer::Render(Scene* pScene) const
 {
+	Render(pScene, 0, m_Width, 0, m_Height);
+}
+
+void Renderer::Render(Scene * pScene, const int fromX, const int toX, const int fromY, const int toY) const
+{
 	Camera& camera = pScene->GetCamera();
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
 
-	for (int px{}; px < m_Width; ++px)
+	for (int px{fromX}; px < toX; ++px)
 	{
-		for (int py{}; py < m_Height; ++py)
+		for (int py{fromY}; py < toY; ++py)
 		{
 
             float ar{ float(m_Width * 1.f / m_Height) };
@@ -68,9 +73,9 @@ void Renderer::Render(Scene* pScene) const
 					directionToLight.Normalize();
 					float lambertVal = Vector3::Dot(closestHit.normal, directionToLight);
 					Ray rayToLight = Ray{ closestHit.origin,directionToLight,0.0001f,mag };
-					if(lambertVal >0.f && !pScene->DoesHit(rayToLight))
+					if(lambertVal >=0.f && !pScene->DoesHit(rayToLight))
 					{
-						finalColor += LightUtils::GetRadiance(lights[i], closestHit.origin) * lambertVal * material->Shade(closestHit,-directionToLight,viewRay.direction);
+						finalColor += LightUtils::GetRadiance(lights[i], closestHit.origin) * lambertVal * material->Shade(closestHit,directionToLight,-viewRay.direction);
 					}
 	            }
             }

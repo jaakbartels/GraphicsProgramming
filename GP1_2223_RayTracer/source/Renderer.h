@@ -21,6 +21,7 @@ namespace dae
 		Renderer& operator=(Renderer&&) noexcept = delete;
 
 		void Render(Scene* pScene) const;
+		void Render(Scene* pScene, int fromX, int toX, int fromY, int toY) const;
 		bool SaveBufferToImage() const;
 
 	private:

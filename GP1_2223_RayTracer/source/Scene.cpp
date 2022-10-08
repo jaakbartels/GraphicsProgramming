@@ -188,25 +188,43 @@ namespace dae {
 
 	void Scene_W3::Initialize()
 	{
-		m_Camera.origin = { 0.f ,1.f , -5.f };
+		m_Camera.origin = { 0.f ,2.f , -10.f };
 		m_Camera.fovAngle = 45.f;
 
 		//default: Material id0 >> SolidColor Material (RED)
-		const unsigned char matId_Red = AddMaterial(new Material_Lambert{ colors::Red , 1.f });
-		const unsigned char matId_Blue = AddMaterial(new Material_LambertPhong{ colors::Blue , 1.f,1.f,30.f });
-		const unsigned char matId_Yellow = AddMaterial(new Material_Lambert{ colors::Yellow , 1.f});
+		const ColorRGB wallColor = ColorRGB{ .8f, .7f, .6f };
+		const ColorRGB warmWhite = ColorRGB{ .99f,.95f, .86f };
+
+		const auto matWhiteRoughPlastic = AddMaterial(new Material_CookTorrence(colors::White, 0.f, 1.f));
+		const auto matWhiteMediumPlastic = AddMaterial(new Material_CookTorrence(colors::White, 0.f, .4f));
+		const auto matWhiteSmoothPlastic = AddMaterial(new Material_CookTorrence(colors::White, 0.f, .1f));
+		const auto matSilverRoughMetal = AddMaterial(new Material_CookTorrence(colors::White, 1.f, 1.f));
+		const auto matSilverMediumMetal = AddMaterial(new Material_CookTorrence(colors::White, 1.f, .6f));
+		const auto matSilverSmoothMetal = AddMaterial(new Material_CookTorrence(colors::White, 1.f, .1f));
+
+
+		const auto matWall = AddMaterial(new Material_Lambert(wallColor, 1.f));
 
 		//Spheres
-		AddSphere({ -.75f, 1.f, 0.f }, 1.f, matId_Red);
-		AddSphere({ .75f, 1.f, 0.f }, 1.f, matId_Blue);
+		AddSphere({ -3.f, 4.f, .0f }, 1.f, matWhiteRoughPlastic);
+		AddSphere({ 0.f, 4.f, .0f }, 1.f, matWhiteMediumPlastic);
+		AddSphere({ 3.f, 4.f, .0f }, 1.f, matWhiteSmoothPlastic);
+		AddSphere({ -3.f, 1.5f, .0f }, 1.f, matSilverRoughMetal);
+		AddSphere({ 0.f, 1.5f, .0f }, 1.f, matSilverMediumMetal);
+		AddSphere({ 3.f, 1.5f, .0f }, 1.f, matSilverSmoothMetal);
 
 		//Plane
-		//AddPlane({ 0.f, -200.f, 0.f }, { 0.f, 0.7071f, 0.7071f }, matId_Solid_Yellow);
-		AddPlane({ 0.f, 0.f, 0.f }, { 0.f, 1.f,0.f }, matId_Yellow);
+		AddPlane({ 0.f, 0.f, 0.f }, { 0.f, 1.f,0.f }, matWall);
+		AddPlane({ -6.f, 0.f, 0.f }, { 1.f, 0.f,0.f }, matWall);
+		AddPlane({ 6.f, 0.f, 0.f }, { -1.f, 0.f,0.f }, matWall);
+		AddPlane({ 0.f, 0.f, 8.f }, { 0.f, 0.f,-1.f }, matWall);
 
-		//Light
-		AddPointLight({ 0.f, 5.f, 5.f }, 25.f, colors::White);
-		AddPointLight({ 0.f, 10.f, -10.f }, 200.f, colors::White);
+		// Light
+		AddPointLight({ 0.f, 5.f, 5.f }, 15.f, warmWhite);
+		AddPointLight({ -3.f, 8.f, 5.f }, 15.f, warmWhite);
+		AddPointLight({ 0.f, 6.f, -10.f }, 120.f, colors::White);
+		AddPointLight({ -5.f, 8.f, -10.f }, 120.f, warmWhite);
+
 	}
 #pragma endregion
 }

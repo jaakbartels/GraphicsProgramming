@@ -77,6 +77,13 @@ int main(int argc, char* args[])
 				if(e.key.keysym.scancode == SDL_SCANCODE_X)
 					takeScreenshot = true;
 				break;
+			case SDL_MOUSEBUTTONUP:
+				if (e.button.button == SDL_BUTTON_LEFT)
+				{
+					//Render a single pixel (for debugging)
+					pRenderer->Render(pScene, e.button.x, e.button.x + 1, e.button.y, e.button.y + 1);
+				}
+				break;
 			}
 		}
 
