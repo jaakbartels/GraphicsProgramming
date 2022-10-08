@@ -46,7 +46,7 @@ int main(int argc, char* args[])
 	const auto pRenderer = new Renderer(pWindow);
 
 	//const auto pScene = new Scene_W1();
-	const auto pScene = new Scene_W2();
+	const auto pScene = new Scene_W3();
 	pScene->Initialize();
 
 	float dotResult{};

@@ -123,9 +123,14 @@ namespace dae
 
 		inline ColorRGB GetRadiance(const Light& light, const Vector3& target)
 		{
-			//todo W3
-			assert(false && "No Implemented Yet!");
-			return {};
+			if(light.type == LightType::Directional)
+			{
+				return  light.color * light.intensity;
+			}else
+			{
+				Vector3 diff = (light.origin - target);
+				return light.color * (light.intensity/Vector3::Dot(diff,diff));
+			}
 		}
 	}
 

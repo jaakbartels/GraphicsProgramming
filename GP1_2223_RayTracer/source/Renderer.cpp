@@ -57,14 +57,12 @@ void Renderer::Render(Scene* pScene) const
             HitRecord closestHit{};
 
             pScene->GetClosestHit(viewRay, closestHit);
-			finalColor.MaxToOne();
 
             if (closestHit.didHit)
             {
-                finalColor = materials[closestHit.materialIndex]->Shade();
-
 	            for(unsigned long i{}; i < lights.size();++i)
 	            {
+					finalColor += LightUtils::GetRadiance(lights[i], closestHit.origin);
 					//Vector3 directionToLight =  LightUtils::GetDirectionToLight(lights[i], closestHit.origin);
 					//float mag{ directionToLight.Magnitude() };
 					//directionToLight.Normalize();
@@ -77,6 +75,7 @@ void Renderer::Render(Scene* pScene) const
 	            }
             }
 
+			finalColor.MaxToOne();
 			//Update Color in Buffer
 			m_pBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBuffer->format,
 				static_cast<uint8_t>(finalColor.r * 255),
