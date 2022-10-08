@@ -60,6 +60,7 @@ void Renderer::Render(Scene* pScene) const
 
             if (closestHit.didHit)
             {
+				auto material{ materials[closestHit.materialIndex] };
 	            for(unsigned long i{}; i < lights.size();++i)
 	            {
 					Vector3 directionToLight =  LightUtils::GetDirectionToLight(lights[i], closestHit.origin);
@@ -68,12 +69,12 @@ void Renderer::Render(Scene* pScene) const
 					float lambertVal = Vector3::Dot(closestHit.normal, directionToLight);
 					if(lambertVal >0.f)
 					{
-						finalColor += LightUtils::GetRadiance(lights[i], closestHit.origin) * lambertVal;
+						finalColor += LightUtils::GetRadiance(lights[i], closestHit.origin) * lambertVal * material->Shade(closestHit,-directionToLight,viewRay.direction);
 					}
 	            }
             }
 
-			//finalColor.MaxToOne();
+			finalColor.MaxToOne();
 			//Update Color in Buffer
 			m_pBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBuffer->format,
 				static_cast<uint8_t>(finalColor.r * 255),
