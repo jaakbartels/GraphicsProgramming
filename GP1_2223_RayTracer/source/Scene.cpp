@@ -193,7 +193,7 @@ namespace dae {
 
 		//default: Material id0 >> SolidColor Material (RED)
 		const unsigned char matId_Red = AddMaterial(new Material_Lambert{ colors::Red , 1.f });
-		const unsigned char matId_Blue = AddMaterial(new Material_Lambert{ colors::Blue , 1.f });
+		const unsigned char matId_Blue = AddMaterial(new Material_LambertPhong{ colors::Blue , 1.f,1.f,30.f });
 		const unsigned char matId_Yellow = AddMaterial(new Material_Lambert{ colors::Yellow , 1.f});
 
 		//Spheres
@@ -206,7 +206,7 @@ namespace dae {
 
 		//Light
 		AddPointLight({ 0.f, 5.f, 5.f }, 25.f, colors::White);
-		AddPointLight({ 0.f, 2.5f, -5.f }, 25.f, colors::White);
+		AddPointLight({ 0.f, 10.f, -10.f }, 200.f, colors::White);
 	}
 #pragma endregion
 }
