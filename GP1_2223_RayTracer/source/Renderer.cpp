@@ -71,11 +71,28 @@ void Renderer::Render(Scene * pScene, const int fromX, const int toX, const int 
 					Vector3 directionToLight =  LightUtils::GetDirectionToLight(lights[i], closestHit.origin);
 					float mag{ directionToLight.Magnitude() };
 					directionToLight.Normalize();
-					float lambertVal = Vector3::Dot(closestHit.normal, directionToLight);
+					float observedArea = Vector3::Dot(closestHit.normal, directionToLight);
 					Ray rayToLight = Ray{ closestHit.origin,directionToLight,0.0001f,mag };
-					if(lambertVal >=0.f && !pScene->DoesHit(rayToLight))
+					if(observedArea >=0.f && ( !m_RenderShadows || !pScene->DoesHit(rayToLight)))
 					{
-						finalColor += LightUtils::GetRadiance(lights[i], closestHit.origin) * lambertVal * material->Shade(closestHit,directionToLight,-viewRay.direction);
+						ColorRGB radiance = LightUtils::GetRadiance(lights[i], closestHit.origin);
+						ColorRGB BRDF = material->Shade(closestHit,directionToLight,-viewRay.direction);
+						
+						switch (m_currentLightingMode)
+						{
+						case LightingMode::ObservedArea:
+							finalColor +=  ColorRGB(1.f,1.f,1.f) * observedArea;
+							break;
+						case LightingMode::Radiance: 
+							finalColor += radiance ;
+							break;
+						case LightingMode::BRDF: 
+							finalColor +=  BRDF;
+							break;
+						case LightingMode::Combined: 
+							finalColor += radiance * observedArea * BRDF;
+							break;
+						}
 					}
 	            }
             }
@@ -97,4 +114,24 @@ void Renderer::Render(Scene * pScene, const int fromX, const int toX, const int 
 bool Renderer::SaveBufferToImage() const
 {
 	return SDL_SaveBMP(m_pBuffer, "RayTracing_Buffer.bmp");
+}
+
+void Renderer::CycleLightingMode()
+{
+	switch (m_currentLightingMode)
+	{
+		case LightingMode::ObservedArea:
+			m_currentLightingMode = LightingMode::Radiance;
+			break;
+		case LightingMode::Radiance: 
+			m_currentLightingMode = LightingMode::BRDF;
+			break;
+		case LightingMode::BRDF: 
+			m_currentLightingMode = LightingMode::Combined;
+			break;
+		case LightingMode::Combined: 
+			m_currentLightingMode = LightingMode::ObservedArea;
+			break;
+		default: ;
+	}
 }

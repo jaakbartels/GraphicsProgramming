@@ -188,43 +188,42 @@ namespace dae {
 
 	void Scene_W3::Initialize()
 	{
-		m_Camera.origin = { 0.f ,2.f , -10.f };
+		m_Camera.origin = { 0.f ,3.f , -9.f };
 		m_Camera.fovAngle = 45.f;
 
 		//default: Material id0 >> SolidColor Material (RED)
-		const ColorRGB wallColor = ColorRGB{ .8f, .7f, .6f };
-		const ColorRGB warmWhite = ColorRGB{ .99f,.95f, .86f };
+		const ColorRGB wallColor = ColorRGB{ .49f, .57f, .57f };
+		const ColorRGB ballPlasticColor = ColorRGB{ .75f, .75f, .75f };
+		const ColorRGB ballMetalColor = ColorRGB{ .972f, .960f, .915f };
 
-		const auto matWhiteRoughPlastic = AddMaterial(new Material_CookTorrence(colors::White, 0.f, 1.f));
-		const auto matWhiteMediumPlastic = AddMaterial(new Material_CookTorrence(colors::White, 0.f, .4f));
-		const auto matWhiteSmoothPlastic = AddMaterial(new Material_CookTorrence(colors::White, 0.f, .1f));
-		const auto matSilverRoughMetal = AddMaterial(new Material_CookTorrence(colors::White, 1.f, 1.f));
-		const auto matSilverMediumMetal = AddMaterial(new Material_CookTorrence(colors::White, 1.f, .6f));
-		const auto matSilverSmoothMetal = AddMaterial(new Material_CookTorrence(colors::White, 1.f, .1f));
-
+		const auto matWhiteRoughPlastic = AddMaterial(new Material_CookTorrence(ballPlasticColor, 0.f, 1.f));
+		const auto matWhiteMediumPlastic = AddMaterial(new Material_CookTorrence(ballPlasticColor, 0.f, .6f));
+		const auto matWhiteSmoothPlastic = AddMaterial(new Material_CookTorrence(ballPlasticColor, 0.f, .1f));
+		const auto matSilverRoughMetal = AddMaterial(new Material_CookTorrence(ballMetalColor, 1.f, 1.f));
+		const auto matSilverMediumMetal = AddMaterial(new Material_CookTorrence(ballMetalColor, 1.f, .6f));
+		const auto matSilverSmoothMetal = AddMaterial(new Material_CookTorrence(ballMetalColor, 1.f, .1f));
 
 		const auto matWall = AddMaterial(new Material_Lambert(wallColor, 1.f));
 
 		//Spheres
-		AddSphere({ -3.f, 4.f, .0f }, 1.f, matWhiteRoughPlastic);
-		AddSphere({ 0.f, 4.f, .0f }, 1.f, matWhiteMediumPlastic);
-		AddSphere({ 3.f, 4.f, .0f }, 1.f, matWhiteSmoothPlastic);
-		AddSphere({ -3.f, 1.5f, .0f }, 1.f, matSilverRoughMetal);
-		AddSphere({ 0.f, 1.5f, .0f }, 1.f, matSilverMediumMetal);
-		AddSphere({ 3.f, 1.5f, .0f }, 1.f, matSilverSmoothMetal);
+		AddSphere({ -1.75f, 3.f, .0f }, .75f, matWhiteRoughPlastic);
+		AddSphere({ 0.f, 3.f, .0f }, .75f, matWhiteMediumPlastic);
+		AddSphere({ 1.75f, 3.f, .0f }, .75f, matWhiteSmoothPlastic);
+		AddSphere({ -1.75f, 1.f, .0f }, .75f, matSilverRoughMetal);
+		AddSphere({ 0.f, 1.f, .0f }, .75f, matSilverMediumMetal);
+		AddSphere({ 1.75f, 1.f, .0f }, .75f, matSilverSmoothMetal);
 
 		//Plane
+		AddPlane({ 0.f, 0.f, 10.f }, { 0.f, 0.f,-1.f }, matWall);
 		AddPlane({ 0.f, 0.f, 0.f }, { 0.f, 1.f,0.f }, matWall);
-		AddPlane({ -6.f, 0.f, 0.f }, { 1.f, 0.f,0.f }, matWall);
-		AddPlane({ 6.f, 0.f, 0.f }, { -1.f, 0.f,0.f }, matWall);
-		AddPlane({ 0.f, 0.f, 8.f }, { 0.f, 0.f,-1.f }, matWall);
+		AddPlane({ 0.f, 10.f, 0.f }, { 0.f, -1.f,0.f }, matWall);
+		AddPlane({ 5.f, 0.f, 0.f }, { -1.f, 0.f,0.f }, matWall);
+		AddPlane({ -5.f, 0.f, 0.f }, { 1.f, 0.f,0.f }, matWall);
 
 		// Light
-		AddPointLight({ 0.f, 5.f, 5.f }, 15.f, warmWhite);
-		AddPointLight({ -3.f, 8.f, 5.f }, 15.f, warmWhite);
-		AddPointLight({ 0.f, 6.f, -10.f }, 120.f, colors::White);
-		AddPointLight({ -5.f, 8.f, -10.f }, 120.f, warmWhite);
-
+		AddPointLight({ 0.f, 5.f, 5.f }, 50.f, ColorRGB{1.f,.61f,.45f});
+		AddPointLight({ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f,.8f,.45f });
+		AddPointLight({ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f,.47f,.68f });
 	}
 #pragma endregion
 }
