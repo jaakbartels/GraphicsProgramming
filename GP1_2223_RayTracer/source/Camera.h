@@ -33,6 +33,9 @@ namespace dae
 
 		Matrix cameraToWorld{};
 
+		const float moveStep = 1.f;
+		const float rotateStep = 0.1f;
+		const int mouseThreshold = 2;
 
 		Matrix CalculateCameraToWorld()
 		{
@@ -51,71 +54,70 @@ namespace dae
 			const Uint8* pStates = SDL_GetKeyboardState(nullptr);
 			if(pStates[SDL_SCANCODE_W])
 			{
-				++origin.z;
+				origin += moveStep * forward;
 			}
 			if (pStates[SDL_SCANCODE_S])
 			{
-				--origin.z;
+				origin -= moveStep * forward;
 			}
 			if (pStates[SDL_SCANCODE_D])
 			{
-				--origin.x;
+				origin += moveStep * right;
 			}
 			if (pStates[SDL_SCANCODE_A])
 			{
-				++origin.x;
+				origin -= moveStep * right;
 			}
 			//Mouse Input
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
 			if (mouseState & SDL_BUTTON_LMASK && mouseState & SDL_BUTTON_RMASK )
 			{
-				if ( mouseY < -10)
+				if ( mouseY < -mouseThreshold)
 				{
-					++origin.y;
+					origin += moveStep * up;
 				}
-				else if ( mouseY > 10)
+				else if ( mouseY > mouseThreshold)
 				{
-					--origin.y;
+					origin -= moveStep * up;
 				}
-				
 			}
 			else if(mouseState & SDL_BUTTON_LMASK)
 			{
-				if(mouseY < -10)
+				if(mouseY < -mouseThreshold)
 				{
-					++origin.z;
+					origin += moveStep * forward;
 				}
-				else if(mouseY > 10)
+				else if(mouseY > mouseThreshold)
 				{
-					--origin.z;
+					origin -= moveStep * forward;
 				}
-				if (mouseX < -10)
+				if (mouseX < -mouseThreshold)
 				{
-					pitch += 0.05f;
+					pitch += rotateStep;
 				}
-				else if (mouseX > 10)
+				else if (mouseX > mouseThreshold)
 				{
-					pitch -= 0.05f;
+					pitch -= rotateStep;
 				}
 			}
 			else if (mouseState & SDL_BUTTON_RMASK)
 			{
-				if (mouseX < -10)
+				if (mouseX < -mouseThreshold)
 				{
-					yaw += 0.05f;
+					yaw += rotateStep;
 				}
-				else if (mouseX > 10)
+				else if (mouseX > mouseThreshold)
 				{
-					yaw -= 0.05f;
+					yaw -= rotateStep;
 				}
-				if (mouseY < -10)
+				if (mouseY < -mouseThreshold)
 				{
-					pitch += 0.05f;
+					pitch += rotateStep;
 				}
-				else if (mouseY > 10)
+				else if (mouseY > mouseThreshold)
 				{
-					pitch -= 0.05f;
+					pitch -= rotateStep;
 				}
 			}
 
@@ -124,9 +126,10 @@ namespace dae
 			Matrix finalRotation = yawRotation * pitchRotation;
 			forward = finalRotation.TransformVector(Vector3::UnitZ);
 			forward.Normalize();
-
-			//todo: W2
-			//assert(false && "Not Implemented Yet");
+			right = finalRotation.TransformVector(Vector3::UnitX);
+			right.Normalize();
+			up = finalRotation.TransformVector(Vector3::UnitY);
+			up.Normalize();
 		}
 	};
 }
