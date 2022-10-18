@@ -250,7 +250,7 @@ namespace dae {
 #pragma region SCENE W4
 	void Scene_W4_TestScene::Initialize()
 	{
-		m_Camera.origin = { 0.f ,1.f , -9.f };
+		m_Camera.origin = { 0.f ,1.f , -5.f };
 		m_Camera.fovAngle = 45.f;
 
 		//default: Material id0 >> SolidColor Material (RED)
@@ -266,7 +266,7 @@ namespace dae {
 
 		//Triangle
 		auto triangle = Triangle{ {-.75f,.5f,.0f}, {-.75f, 2.f, .0f}, {.75f, .5f, 0.f} };
-		triangle.cullMode = TriangleCullMode::NoCulling;
+		triangle.cullMode = TriangleCullMode::BackFaceCulling;
 		triangle.materialIndex = matLambert_White;
 		m_Triangles.emplace_back(triangle);
 

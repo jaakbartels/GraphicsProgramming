@@ -118,11 +118,15 @@ namespace dae
 				&& CheckEdge(triangle.v1, triangle.v2, normal, p)
 				&& CheckEdge(triangle.v2, triangle.v0, normal, p))
 			{
-				if (ignoreHitRecord)
+				bool rayHitsFrontSide = (Vector3::Dot(normal, ray.direction) < 0) ^ ignoreHitRecord;
+				bool hide = (rayHitsFrontSide && triangle.cullMode == TriangleCullMode::FrontFaceCulling) || (!rayHitsFrontSide && triangle.cullMode == TriangleCullMode::BackFaceCulling);
+
+				if (hide)
 				{
-					//TODO: shadowCalculation
+					return false;
 				}
-				else
+
+				if (!ignoreHitRecord)
 				{
 					hitRecord.didHit = true;
 					hitRecord.materialIndex = triangle.materialIndex;
