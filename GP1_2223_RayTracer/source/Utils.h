@@ -83,10 +83,56 @@ namespace dae
 #pragma endregion
 #pragma region Triangle HitTest
 		//TRIANGLE HIT-TESTS
+
+		inline bool CheckEdge(const Vector3& from, const Vector3& to, const Vector3& normal, const Vector3& p)
+		{
+			Vector3 edge = to - from;
+			Vector3 pointToSide = p - from;
+			return Vector3::Dot(normal, Vector3::Cross(edge, pointToSide)) >= 0;
+		}
+
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			assert(false && "No Implemented Yet!");
+			Vector3 a = triangle.v1 - triangle.v0;
+			Vector3 b = triangle.v2 - triangle.v0;
+			Vector3 normal = Vector3::Cross(a, b);
+
+			if (Vector3::Dot(normal, ray.direction) == 0)
+			{
+				//Ray is parallel with Plane of triangle => no intersection
+				return false;
+			}
+
+			Vector3 center = (triangle.v0 + triangle.v1 + triangle.v2) / 3.f;
+			Vector3 l = center - ray.origin;
+			float t = Vector3::Dot(l, normal) / Vector3::Dot(ray.direction, normal);
+
+			if (t < ray.min || t > ray.max)
+			{
+				return false;
+			}
+
+			Vector3 p = ray.origin + t * ray.direction;
+
+			if (CheckEdge(triangle.v0, triangle.v1, normal, p)
+				&& CheckEdge(triangle.v1, triangle.v2, normal, p)
+				&& CheckEdge(triangle.v2, triangle.v0, normal, p))
+			{
+				if (ignoreHitRecord)
+				{
+					//TODO: shadowCalculation
+				}
+				else
+				{
+					hitRecord.didHit = true;
+					hitRecord.materialIndex = triangle.materialIndex;
+					hitRecord.origin = p;
+					hitRecord.normal = normal;
+					hitRecord.t = t;
+				}
+				return true;
+			}
+
 			return false;
 		}
 

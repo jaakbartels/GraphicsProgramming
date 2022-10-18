@@ -51,6 +51,18 @@ namespace dae {
 				closestHit = hitInfo;
 			}
 		}
+
+		// Check the triangles
+		const size_t trianglesSize{ m_Triangles.size() };
+		for (size_t i{}; i < trianglesSize; ++i)
+		{
+			HitRecord hitInfo{};
+			GeometryUtils::HitTest_Triangle(m_Triangles[i], ray, hitInfo);
+			if (hitInfo.t < closestHit.t)
+			{
+				closestHit = hitInfo;
+			}
+		}
 	}
 
 	bool Scene::DoesHit(const Ray& ray) const
@@ -65,6 +77,13 @@ namespace dae {
 		for (int i = 0; i < m_PlaneGeometries.size(); ++i)
 		{
 			if (GeometryUtils::HitTest_Plane(m_PlaneGeometries[i], ray))
+			{
+				return true;
+			}
+		}
+		for (int i = 0; i < m_Triangles.size(); ++i)
+		{
+			if (GeometryUtils::HitTest_Triangle(m_Triangles[i], ray))
 			{
 				return true;
 			}
@@ -225,5 +244,37 @@ namespace dae {
 		AddPointLight({ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f,.8f,.45f });
 		AddPointLight({ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f,.47f,.68f });
 	}
+#pragma endregion
+
+
+#pragma region SCENE W4
+	void Scene_W4_TestScene::Initialize()
+	{
+		m_Camera.origin = { 0.f ,1.f , -9.f };
+		m_Camera.fovAngle = 45.f;
+
+		//default: Material id0 >> SolidColor Material (RED)
+		const auto matLambert_GrayBlue = AddMaterial(new Material_Lambert({ .49f, .57f, .57f }, 1.f));
+		const auto matLambert_White = AddMaterial(new Material_Lambert(colors::White, 1.f));
+
+		//Plane
+		AddPlane({ 0.f, 0.f, 10.f }, { 0.f, 0.f,-1.f }, matLambert_GrayBlue);
+		AddPlane({ 0.f, 0.f, 0.f }, { 0.f, 1.f,0.f }, matLambert_GrayBlue);
+		AddPlane({ 0.f, 10.f, 0.f }, { 0.f, -1.f,0.f }, matLambert_GrayBlue);
+		AddPlane({ 5.f, 0.f, 0.f }, { -1.f, 0.f,0.f }, matLambert_GrayBlue);
+		AddPlane({ -5.f, 0.f, 0.f }, { 1.f, 0.f,0.f }, matLambert_GrayBlue);
+
+		//Triangle
+		auto triangle = Triangle{ {-.75f,.5f,.0f}, {-.75f, 2.f, .0f}, {.75f, .5f, 0.f} };
+		triangle.cullMode = TriangleCullMode::NoCulling;
+		triangle.materialIndex = matLambert_White;
+		m_Triangles.emplace_back(triangle);
+
+		// Light
+		AddPointLight({ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f,.61f,.45f });
+		AddPointLight({ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f,.8f,.45f });
+		AddPointLight({ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f,.47f,.68f });
+	}
+
 #pragma endregion
 }
