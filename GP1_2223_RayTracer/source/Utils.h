@@ -85,9 +85,46 @@ namespace dae
 		//TRIANGLE HIT-TESTS
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			assert(false && "No Implemented Yet!");
-			return false;
+			const Vector3 a{ triangle.v1 - triangle.v0 };
+			const Vector3 b{ triangle.v2 - triangle.v0 };
+			const Vector3 c{ triangle.v2 - triangle.v1 };
+		
+			
+			const Vector3 normal{ Vector3::Cross(a,b) };
+
+
+			if (Vector3::Dot(normal, ray.direction) == 0) return false;
+
+			if (Vector3::Dot(normal, ray.direction) > 0 &&
+				triangle.cullMode == TriangleCullMode::BackFaceCulling) return false;
+
+			if (Vector3::Dot(normal, ray.direction) < 0 &&
+				triangle.cullMode == TriangleCullMode::FrontFaceCulling) return false;
+
+
+			const Vector3 center{ (triangle.v0 + triangle.v1 + triangle.v2) / 3.f };
+			const Vector3 L{ center - ray.origin };
+			const float t{ Vector3::Dot(L, normal) / Vector3::Dot(ray.direction, normal) };
+
+			if (t < ray.min || t > ray.max) return false;
+
+			const Vector3 p{ ray.origin + t * ray.direction };
+			const Vector3 pointToSide{ p - triangle.v0 };
+
+			if (Vector3::Dot(normal, Vector3::Cross(a, pointToSide)) < 0) return false;
+			if (Vector3::Dot(normal, Vector3::Cross(b, pointToSide)) < 0) return false;
+			if (Vector3::Dot(normal, Vector3::Cross(c, pointToSide)) < 0) return false;
+			
+			
+				
+			hitRecord.didHit = true;
+			hitRecord.t = t;
+			hitRecord.normal = normal;
+			hitRecord.origin = p;
+			hitRecord.materialIndex = triangle.materialIndex;
+			return true;
+			
+		
 		}
 
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray)
