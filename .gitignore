@@ -2,3 +2,4 @@
 *.obj
 TempFiles/
 .vs/
+**/x64/**

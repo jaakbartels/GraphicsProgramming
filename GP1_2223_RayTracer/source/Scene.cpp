@@ -74,6 +74,13 @@ namespace dae {
 				return true;
 			}
 		}
+		for (int i = 0; i < m_Triangles.size(); ++i)
+		{
+			if (GeometryUtils::HitTest_Triangle(m_Triangles[i], ray))
+			{
+				return true;
+			}
+		}
 		for (int i = 0; i < m_PlaneGeometries.size(); ++i)
 		{
 			if (GeometryUtils::HitTest_Plane(m_PlaneGeometries[i], ray))
