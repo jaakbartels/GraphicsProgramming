@@ -6,8 +6,8 @@ namespace dae {
 
 #pragma region Base Scene
 	//Initialize Scene with Default Solid Color Material (RED)
-	Scene::Scene():
-		m_Materials({ new Material_SolidColor({1,0,0})})
+	Scene::Scene() :
+		m_Materials({ new Material_SolidColor({1,0,0}) })
 	{
 		m_SphereGeometries.reserve(32);
 		m_PlaneGeometries.reserve(32);
@@ -17,7 +17,7 @@ namespace dae {
 
 	Scene::~Scene()
 	{
-		for(auto& pMaterial : m_Materials)
+		for (auto& pMaterial : m_Materials)
 		{
 			delete pMaterial;
 			pMaterial = nullptr;
@@ -52,12 +52,12 @@ namespace dae {
 			}
 		}
 
-		// Check the triangles
-		const size_t trianglesSize{ m_Triangles.size() };
-		for (size_t i{}; i < trianglesSize; ++i)
+		// Check the triangleMeshes
+		const size_t triangleMeshesSize{ m_TriangleMeshGeometries.size() };
+		for (size_t i{}; i < triangleMeshesSize; ++i)
 		{
 			HitRecord hitInfo{};
-			GeometryUtils::HitTest_Triangle(m_Triangles[i], ray, hitInfo);
+			GeometryUtils::HitTest_TriangleMesh(m_TriangleMeshGeometries[i], ray, hitInfo);
 			if (hitInfo.t < closestHit.t)
 			{
 				closestHit = hitInfo;
@@ -81,9 +81,10 @@ namespace dae {
 				return true;
 			}
 		}
-		for (int i = 0; i < m_Triangles.size(); ++i)
+		const size_t triangleMeshesSize{ m_TriangleMeshGeometries.size() };
+		for (size_t i{}; i < triangleMeshesSize; ++i)
 		{
-			if (GeometryUtils::HitTest_Triangle(m_Triangles[i], ray))
+			if (GeometryUtils::HitTest_TriangleMesh(m_TriangleMeshGeometries[i], ray))
 			{
 				return true;
 			}
@@ -240,7 +241,7 @@ namespace dae {
 		AddPlane({ -5.f, 0.f, 0.f }, { 1.f, 0.f,0.f }, matWall);
 
 		// Light
-		AddPointLight({ 0.f, 5.f, 5.f }, 50.f, ColorRGB{1.f,.61f,.45f});
+		AddPointLight({ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f,.61f,.45f });
 		AddPointLight({ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f,.8f,.45f });
 		AddPointLight({ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f,.47f,.68f });
 	}
@@ -264,11 +265,16 @@ namespace dae {
 		AddPlane({ 5.f, 0.f, 0.f }, { -1.f, 0.f,0.f }, matLambert_GrayBlue);
 		AddPlane({ -5.f, 0.f, 0.f }, { 1.f, 0.f,0.f }, matLambert_GrayBlue);
 
-		//Triangle
-		auto triangle = Triangle{ {-.75f,.5f,.0f}, {-.75f, 2.f, .0f}, {.75f, .5f, 0.f} };
-		triangle.cullMode = TriangleCullMode::BackFaceCulling;
-		triangle.materialIndex = matLambert_White;
-		m_Triangles.emplace_back(triangle);
+		//Triangle Mesh
+		const auto triangleMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
+		triangleMesh->positions = { {-.75f, -1.f, .0f}, {-.75f,1.f,.0f}, {.75f,1.f,.0f}, {.75f,-1.f,-0.5f} };
+		triangleMesh->indices = {
+			0,1,2,  //Triangle 1
+			0,2,3	//Triangle 2
+		};
+
+		triangleMesh->CalculateNormals();
+		triangleMesh->UpdateTransforms();
 
 		// Light
 		AddPointLight({ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f,.61f,.45f });

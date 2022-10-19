@@ -123,20 +123,21 @@ namespace dae
 
 		void CalculateNormals()
 		{
-			assert(false && "No Implemented Yet!");
+			normals.clear();
+			size_t n_indices{ indices.size() };
+
+			for (int i0 = 0; i0 < n_indices-2; i0+=3 )
+			{
+				Vector3 a{ positions[indices[i0 + 1]] - positions[indices[i0]] };
+				Vector3 b{ positions[indices[i0 + 2]] - positions[indices[i0]] };
+				normals.push_back(Vector3::Cross(a, b));
+			}
 		}
 
 		void UpdateTransforms()
 		{
-			assert(false && "No Implemented Yet!");
-			//Calculate Final Transform 
-			//const auto finalTransform = ...
-
-			//Transform Positions (positions > transformedPositions)
-			//...
-
-			//Transform Normals (normals > transformedNormals)
-			//...
+			transformedNormals = normals;
+			transformedPositions = positions;
 		}
 	};
 #pragma endregion
