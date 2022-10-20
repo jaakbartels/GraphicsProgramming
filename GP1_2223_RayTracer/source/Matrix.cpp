@@ -35,9 +35,9 @@ namespace dae {
 	Vector3 Matrix::TransformVector(float x, float y, float z) const
 	{
 		return Vector3{
-			data[0].x * x + data[1].x * y + data[2].x * z,
-			data[0].y * x + data[1].y * y + data[2].y * z,
-			data[0].z * x + data[1].z * y + data[2].z * z
+			data[0].x * x + data[1].x * y + data[2].x * z + data[3].x,
+			data[0].y * x + data[1].y * y + data[2].y * z + data[3].y,
+			data[0].z * x + data[1].z * y + data[2].z * z + data[3].z
 		};
 	}
 

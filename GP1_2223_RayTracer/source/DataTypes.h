@@ -136,8 +136,25 @@ namespace dae
 
 		void UpdateTransforms()
 		{
-			transformedNormals = normals;
-			transformedPositions = positions;
+
+			transformedNormals = std::vector<Vector3>{};
+			transformedNormals.reserve(normals.size());
+
+			for (int i=0; i<normals.size(); ++i)
+			{
+				//normals don't have to be scaled or translated, only rotated
+				transformedNormals.emplace_back( rotationTransform.TransformVector(normals[i]));
+			}
+
+			transformedPositions = std::vector<Vector3>{};
+			transformedPositions.reserve(positions.size());
+
+			const Matrix matrix{ scaleTransform * rotationTransform * translationTransform};
+
+			for (int i = 0; i < positions.size(); ++i)
+			{
+				transformedPositions.emplace_back(matrix.TransformVector(positions[i]));
+			}
 		}
 	};
 #pragma endregion

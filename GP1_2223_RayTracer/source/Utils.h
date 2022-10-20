@@ -178,11 +178,6 @@ namespace dae
 			if (closestHit.didHit && !ignoreHitRecord)
 			{
 				hitRecord = closestHit;
-				//hitRecord.didHit = true;
-				//hitRecord.materialIndex = closestHit.materialIndex;
-				//hitRecord.normal = closestHit.normal;
-				//hitRecord.origin = closestHit.origin;
-				//hitRecord.t = closestHit.t;
 			}
 
 			return closestHit.didHit;

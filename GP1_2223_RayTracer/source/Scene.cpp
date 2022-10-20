@@ -266,21 +266,37 @@ namespace dae {
 		AddPlane({ -5.f, 0.f, 0.f }, { 1.f, 0.f,0.f }, matLambert_GrayBlue);
 
 		//Triangle Mesh
-		const auto triangleMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
-		triangleMesh->positions = { {-.75f, -1.f, .0f}, {-.75f,1.f,.0f}, {.75f,1.f,.0f}, {.75f,-1.f,-0.5f} };
-		triangleMesh->indices = {
+		pMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
+		pMesh->positions = {
+			{-.75f, -1.f, .0f},
+			{-.75f,1.f,.0f},
+			{.75f,1.f,1.f},
+			{.75f,-1.f,.0f} };
+
+		pMesh->indices = {
 			0,1,2,  //Triangle 1
 			0,2,3	//Triangle 2
 		};
 
-		triangleMesh->CalculateNormals();
-		triangleMesh->UpdateTransforms();
+		pMesh->CalculateNormals();
+
+		pMesh->Translate({ 0.f,1.5f,0.f });
+		pMesh->UpdateTransforms();
 
 		// Light
 		AddPointLight({ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f,.61f,.45f });
 		AddPointLight({ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f,.8f,.45f });
 		AddPointLight({ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f,.47f,.68f });
 	}
+
+	void Scene_W4_TestScene::Update(Timer* pTimer)
+	{
+		Scene::Update(pTimer);
+
+		pMesh->RotateY(PI_DIV_2 * pTimer->GetTotal());
+		pMesh->UpdateTransforms();
+	}
+
 
 #pragma endregion
 }
