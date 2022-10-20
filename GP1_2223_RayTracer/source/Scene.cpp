@@ -267,20 +267,10 @@ namespace dae {
 
 		//Triangle Mesh
 		pMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
-		pMesh->positions = {
-			{-.75f, -1.f, .0f},
-			{-.75f,1.f,.0f},
-			{.75f,1.f,1.f},
-			{.75f,-1.f,.0f} };
-
-		pMesh->indices = {
-			0,1,2,  //Triangle 1
-			0,2,3	//Triangle 2
-		};
-
-		pMesh->CalculateNormals();
+		Utils::ParseOBJ("Resources/simple_cube.obj", pMesh->positions, pMesh->normals, pMesh->indices);
 
 		pMesh->Translate({ 0.f,1.5f,0.f });
+		pMesh->Scale({ .7f, .7f, .7f });
 		pMesh->UpdateTransforms();
 
 		// Light
@@ -293,7 +283,7 @@ namespace dae {
 	{
 		Scene::Update(pTimer);
 
-		pMesh->RotateY(PI_DIV_2 * pTimer->GetTotal());
+		pMesh->RotateY(PI_DIV_2 * pTimer->GetTotal() / 5.f);
 		pMesh->UpdateTransforms();
 	}
 
