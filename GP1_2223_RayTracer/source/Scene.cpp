@@ -287,6 +287,77 @@ namespace dae {
 		pMesh->UpdateTransforms();
 	}
 
+	void Scene_W4_ReferenceScene::Initialize()
+	{
+		m_Camera.origin = { 0.f ,3.f , -9.f };
+		m_Camera.fovAngle = 45.f;
+
+		//default: Material id0 >> SolidColor Material (RED)
+		const ColorRGB wallColor = ColorRGB{ .49f, .57f, .57f };
+		const ColorRGB ballPlasticColor = ColorRGB{ .75f, .75f, .75f };
+		const ColorRGB ballMetalColor = ColorRGB{ .972f, .960f, .915f };
+
+		const auto matCT_GrayRoughMetal = AddMaterial(new Material_CookTorrence(ballMetalColor, 1.f, 1.f));
+		const auto matCT_GrayMediumMetal = AddMaterial(new Material_CookTorrence(ballMetalColor, 1.f, .6f));
+		const auto matCT_GraySmoothMetal = AddMaterial(new Material_CookTorrence(ballMetalColor, 1.f, .1f));
+		const auto matCT_GrayRoughPlastic = AddMaterial(new Material_CookTorrence(ballPlasticColor, 0.f, 1.f));
+		const auto matCT_GrayMediumPlastic = AddMaterial(new Material_CookTorrence(ballPlasticColor, 0.f, .6f));
+		const auto matCT_GraySmoothPlastic = AddMaterial(new Material_CookTorrence(ballPlasticColor, 0.f, .1f));
+
+		const auto matLambert_GrayBlue = AddMaterial(new Material_Lambert(wallColor, 1.f));
+		const auto matLambert_White = AddMaterial(new Material_Lambert(colors::White, 1.f));
+
+		//Planes
+		AddPlane({ 0.f, 0.f, 10.f }, { 0.f, 0.f,-1.f }, matLambert_GrayBlue);
+		AddPlane({ 0.f, 0.f, 0.f }, { 0.f, 1.f,0.f }, matLambert_GrayBlue);
+		AddPlane({ 0.f, 10.f, 0.f }, { 0.f, -1.f,0.f }, matLambert_GrayBlue);
+		AddPlane({ 5.f, 0.f, 0.f }, { -1.f, 0.f,0.f }, matLambert_GrayBlue);
+		AddPlane({ -5.f, 0.f, 0.f }, { 1.f, 0.f,0.f }, matLambert_GrayBlue);
+
+		//Spheres
+		AddSphere({ -1.75f, 1.f, .0f }, .75f, matCT_GrayRoughMetal);
+		AddSphere({ 0.f, 1.f, .0f }, .75f, matCT_GrayMediumMetal);
+		AddSphere({ 1.75f, 1.f, .0f }, .75f, matCT_GraySmoothMetal);
+		AddSphere({ -1.75f, 3.f, .0f }, .75f, matCT_GrayRoughPlastic);
+		AddSphere({ 0.f, 3.f, .0f }, .75f, matCT_GrayMediumPlastic);
+		AddSphere({ 1.75f, 3.f, .0f }, .75f, matCT_GraySmoothPlastic);
+
+		//CW Winding order
+		const Triangle baseTriangle = { {-.75f, 1.5f,0.f},{.75f, 0.f, 0.f},{-.75f,0.f,0.f} };
+
+		m_Meshes[0] = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
+		m_Meshes[0]->AppendTriangle(baseTriangle, true);
+		m_Meshes[0]->Translate({ -1.75f,4.5f,0.f });
+		m_Meshes[0]->UpdateTransforms();
+
+		m_Meshes[1] = AddTriangleMesh(TriangleCullMode::FrontFaceCulling, matLambert_White);
+		m_Meshes[1]->AppendTriangle(baseTriangle, true);
+		m_Meshes[1]->Translate({ 0.f,4.5f,0.f });
+		m_Meshes[1]->UpdateTransforms();
+
+		m_Meshes[2] = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
+		m_Meshes[2]->AppendTriangle(baseTriangle, true);
+		m_Meshes[2]->Translate({ 1.75f,4.5f,0.f });
+		m_Meshes[2]->UpdateTransforms();
+
+		// Light
+		AddPointLight({ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f,.61f,.45f });
+		AddPointLight({ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f,.8f,.45f });
+		AddPointLight({ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f,.47f,.68f });
+	}
+
+	void Scene_W4_ReferenceScene::Update(Timer* pTimer)
+	{
+		Scene::Update(pTimer);
+
+		const auto yawAngle = (cos(pTimer->GetTotal()) + 1.f) / 2.f * PI_2;
+		for (const auto m: m_Meshes)
+		{
+			m->RotateY(yawAngle);
+			m->UpdateTransforms();
+		}
+	}
+
 
 #pragma endregion
 }
