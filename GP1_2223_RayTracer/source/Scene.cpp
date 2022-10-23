@@ -287,6 +287,36 @@ namespace dae {
 		pMesh->UpdateTransforms();
 	}
 
+	void Scene_W4_BunnyScene::Initialize()
+	{
+		m_Camera.origin = { 0.f ,3.f , -10.f };
+		m_Camera.fovAngle = 45.f;
+
+		//default: Material id0 >> SolidColor Material (RED)
+		const auto matLambert_GrayBlue = AddMaterial(new Material_Lambert({ .49f, .57f, .57f }, 1.f));
+		const auto matLambert_White = AddMaterial(new Material_Lambert(colors::White, 1.f));
+
+		//Plane
+		AddPlane({ 0.f, 0.f, 10.f }, { 0.f, 0.f,-1.f }, matLambert_GrayBlue);
+		AddPlane({ 0.f, 0.f, 0.f }, { 0.f, 1.f,0.f }, matLambert_GrayBlue);
+		AddPlane({ 0.f, 10.f, 0.f }, { 0.f, -1.f,0.f }, matLambert_GrayBlue);
+		AddPlane({ 5.f, 0.f, 0.f }, { -1.f, 0.f,0.f }, matLambert_GrayBlue);
+		AddPlane({ -5.f, 0.f, 0.f }, { 1.f, 0.f,0.f }, matLambert_GrayBlue);
+
+		//Triangle Mesh
+		pMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
+		Utils::ParseOBJ("Resources/lowpoly_bunny.obj", pMesh->positions, pMesh->normals, pMesh->indices);
+
+		pMesh->Scale({ 2.f, 2.f, 2.f });
+		pMesh->RotateY(135.f);
+		pMesh->UpdateTransforms();
+
+		// Light
+		AddPointLight({ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f,.61f,.45f });
+		AddPointLight({ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f,.8f,.45f });
+		AddPointLight({ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f,.47f,.68f });
+	}
+
 	void Scene_W4_ReferenceScene::Initialize()
 	{
 		m_Camera.origin = { 0.f ,3.f , -9.f };
