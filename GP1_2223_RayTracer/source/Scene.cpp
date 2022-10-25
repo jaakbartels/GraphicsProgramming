@@ -317,6 +317,14 @@ namespace dae {
 		AddPointLight({ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f,.47f,.68f });
 	}
 
+	void Scene_W4_BunnyScene::Update(Timer* pTimer)
+	{
+		Scene::Update(pTimer);
+		pMesh->RotateY(PI_DIV_4 * pTimer->GetTotal() / 4.0f);
+		pMesh->UpdateTransforms();
+			
+	}
+
 	void Scene_W4_ReferenceScene::Initialize()
 	{
 		m_Camera.origin = { 0.f ,3.f , -9.f };
