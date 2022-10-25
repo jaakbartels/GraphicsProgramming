@@ -4,9 +4,6 @@
 
 //Project includes
 #include "Renderer.h"
-
-#include <iostream>
-
 #include "Math.h"
 #include "Matrix.h"
 #include "Material.h"
@@ -37,7 +34,7 @@ void Renderer::Render(Scene* pScene) const
 void Renderer::Render(Scene* pScene, const int fromX, const int toX, const int fromY, const int toY) const
 {
 	Camera& camera = pScene->GetCamera();
-	camera.CalculateCameraToWorld();
+
 	float ar{ float(m_Width * 1.f / m_Height) };
 	float FOV = tanf(camera.fovAngle / 2 * TO_RADIANS);
 
@@ -51,13 +48,13 @@ void Renderer::Render(Scene* pScene, const int fromX, const int toX, const int f
 	const uint32_t numCores = std::thread::hardware_concurrency();
 	std::vector<std::future<void>> async_futures{};
 
-	const uint32_t numPielsPertask = numPix / numCores;
+	const uint32_t numPixelsPertask = numPix / numCores;
 	uint32_t numUnassignedPixels = numPix % numCores;
 	uint32_t currentPix{ 0 };
 
 	for (uint32_t coreId{0}; coreId < numCores; ++coreId)
 	{
-		uint32_t taskSize = numPielsPertask;
+		uint32_t taskSize = numPixelsPertask;
 		if(numUnassignedPixels > 0)
 		{
 			++taskSize;
@@ -107,10 +104,9 @@ void Renderer::RenderPixel(Scene* pscene, uint32_t pixelIndex, float fov, float 
 	const float rx = px + 0.5f;
 	const float ry = py + 0.5f;
 
-	const float cX{ 2 * (rx / float(m_Width) - 1) * aspectRatio * fov };
-	const float cY{ 1 - (2 * (ry / float(m_Height))) * fov };
-
-	
+	const float cX{ (2 * rx / float(m_Width) - 1) * aspectRatio * fov };
+	const float cY{ (1 - 2 * (ry / float(m_Height))) * fov };
+		
 	Vector3 rayDirection{ cX, cY, 1 };
 
 	rayDirection = cX * camera.right + cY * camera.up + 1.0f * camera.forward;
