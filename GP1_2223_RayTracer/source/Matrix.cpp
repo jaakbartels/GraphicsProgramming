@@ -35,9 +35,9 @@ namespace dae {
 	Vector3 Matrix::TransformVector(float x, float y, float z) const
 	{
 		return Vector3{
-			data[0].x * x + data[1].x * y + data[2].x * z,
-			data[0].y * x + data[1].y * y + data[2].y * z,
-			data[0].z * x + data[1].z * y + data[2].z * z
+			data[0].x * x + data[1].x * y + data[2].x * z + data[3].x,
+			data[0].y * x + data[1].y * y + data[2].y * z + data[3].y,
+			data[0].z * x + data[1].z * y + data[2].z * z + data[3].z
 		};
 	}
 
@@ -143,9 +143,7 @@ namespace dae {
 
 	Matrix Matrix::CreateScale(float sx, float sy, float sz)
 	{
-		//todo W1
-		assert(false && "Not Implemented Yet");
-		return {};
+		return { {sx,0.f,0.f}, {0.f, sy,0.f}, {0.f,0.f, sz}, Vector3::Zero};
 	}
 
 	Matrix Matrix::CreateScale(const Vector3& s)

@@ -68,6 +68,18 @@ namespace dae
 			{
 				origin -= moveStep * right;
 			}
+			if (pStates[SDL_SCANCODE_B]) //move camera to back 
+			{
+				origin = { .0f,1.f,4.f };
+				yaw = PI;
+				pitch = 0.f;
+			}
+			if (pStates[SDL_SCANCODE_F]) //move camera to front
+			{
+				origin = { .0f, 1.f, -5.f };
+				yaw = 0;
+				pitch = 0.f;
+			}
 			//Mouse Input
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);

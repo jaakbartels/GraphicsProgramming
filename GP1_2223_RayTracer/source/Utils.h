@@ -83,40 +83,57 @@ namespace dae
 #pragma endregion
 #pragma region Triangle HitTest
 		//TRIANGLE HIT-TESTS
+
+		inline bool CheckEdge(const Vector3& from, const Vector3& to, const Vector3& normal, const Vector3& p)
+		{
+			Vector3 edge = to - from;
+			Vector3 pointToSide = p - from;
+			return Vector3::Dot(normal, Vector3::Cross(edge, pointToSide)) >= 0;
+		}
+
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			const Vector3 a{ triangle.v1 - triangle.v0 };
-			const Vector3 b{ triangle.v2 - triangle.v0 };
-			const Vector3 c{ triangle.v2 - triangle.v1 };
-			
-			const Vector3 normal{ Vector3::Cross(a,b) };
+			if (Vector3::Dot(triangle.normal, ray.direction) == 0)
+			{
+				//Ray is parallel with Plane of triangle => no intersection
+				return false;
+			}
 
-			if (Vector3::Dot(normal, ray.direction) == 0) return false;
+			Vector3 center = (triangle.v0 + triangle.v1 + triangle.v2) / 3.f;
+			Vector3 l = center - ray.origin;
+			float t = Vector3::Dot(l, triangle.normal) / Vector3::Dot(ray.direction, triangle.normal);
 
-			if (Vector3::Dot(normal, ray.direction) > 0 &&
-				triangle.cullMode == TriangleCullMode::BackFaceCulling) return false;
+			if (t < ray.min || t > ray.max)
+			{
+				return false;
+			}
 
-			if (Vector3::Dot(normal, ray.direction) < 0 &&
-				triangle.cullMode == TriangleCullMode::FrontFaceCulling) return false;
+			Vector3 p = ray.origin + t * ray.direction;
 
-			const Vector3 center{ (triangle.v0 + triangle.v1 + triangle.v2) / 3.f };
-			const Vector3 L{ center - ray.origin };
-			const float t{ Vector3::Dot(L, normal) / Vector3::Dot(ray.direction, normal) };
+			if (CheckEdge(triangle.v0, triangle.v1, triangle.normal, p)
+				&& CheckEdge(triangle.v1, triangle.v2, triangle.normal, p)
+				&& CheckEdge(triangle.v2, triangle.v0, triangle.normal, p))
+			{
+				bool rayHitsFrontSide = (Vector3::Dot(triangle.normal, ray.direction) < 0) ^ ignoreHitRecord;
+				bool hide = (rayHitsFrontSide && triangle.cullMode == TriangleCullMode::FrontFaceCulling) || (!rayHitsFrontSide && triangle.cullMode == TriangleCullMode::BackFaceCulling);
 
-			if (t < ray.min || t > ray.max) return false;
+				if (hide)
+				{
+					return false;
+				}
 
-			const Vector3 p{ ray.origin + t * ray.direction };
+				if (!ignoreHitRecord)
+				{
+					hitRecord.didHit = true;
+					hitRecord.materialIndex = triangle.materialIndex;
+					hitRecord.origin = p;
+					hitRecord.normal = triangle.normal;
+					hitRecord.t = t;
+				}
+				return true;
+			}
 
-			if (Vector3::Dot(normal, Vector3::Cross(a, p - triangle.v0)) < 0) return false;
-			if (Vector3::Dot(normal, Vector3::Cross(-b, p - triangle.v2)) < 0) return false;
-			if (Vector3::Dot(normal, Vector3::Cross(c, p - triangle.v1)) < 0) return false;
-				
-			hitRecord.didHit = true;
-			hitRecord.t = t;
-			hitRecord.normal = normal;
-			hitRecord.origin = p;
-			hitRecord.materialIndex = triangle.materialIndex;
-			return true;
+			return false;
 		}
 
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray)
@@ -128,9 +145,42 @@ namespace dae
 #pragma region TriangeMesh HitTest
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			assert(false && "No Implemented Yet!");
-			return false;
+			size_t n_indices{ mesh.indices.size() };
+			float t_min{ FLT_MAX };
+			HitRecord closestHit{};
+			size_t normalsIndex{ 0 };
+
+			for (int i0 = 0; i0 < n_indices - 2; i0 += 3)
+			{
+				Triangle triangle { mesh.transformedPositions[mesh.indices[i0]], mesh.transformedPositions[mesh.indices[i0 + 1]], mesh.transformedPositions[mesh.indices[i0 + 2]], mesh.transformedNormals[normalsIndex] };
+				triangle.cullMode = mesh.cullMode;
+				triangle.materialIndex = mesh.materialIndex;
+
+				HitRecord thisTriangleHitRecord{};
+
+				++normalsIndex;
+
+				if (HitTest_Triangle(triangle, ray, thisTriangleHitRecord, ignoreHitRecord))
+				{
+					if (ignoreHitRecord)
+					{
+						//No need to find "closer" hits
+						return true;
+					}
+
+					if (closestHit.t > thisTriangleHitRecord.t)
+					{
+						closestHit = thisTriangleHitRecord;
+					}
+				}
+			}
+
+			if (closestHit.didHit && !ignoreHitRecord)
+			{
+				hitRecord = closestHit;
+			}
+
+			return closestHit.didHit;
 		}
 
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
