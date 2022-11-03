@@ -52,11 +52,7 @@ namespace dae {
 
 	Vector3 Vector3::Cross(const Vector3& v1, const Vector3& v2)
 	{
-		Vector3 result{};
-		result.x = (v1.y * v2.z - v1.z * v2.y);
-		result.y = -(v1.x * v2.z - v1.z * v2.x);
-		result.z = (v1.x * v2.y - v1.y * v2.x);
-		return result;
+		return Vector3{ v1.y * v2.z - v1.z * v2.y, -(v1.x * v2.z - v1.z * v2.x), v1.x * v2.y - v1.y * v2.x };
 	}
 
 	Vector3 Vector3::Project(const Vector3& v1, const Vector3& v2)
@@ -103,7 +99,8 @@ namespace dae {
 
 	Vector3 Vector3::operator/(float scale) const
 	{
-		return { x / scale, y / scale, z / scale };
+		const float f = 1.f / scale;
+		return { x * f, y *f, z *f };
 	}
 
 	Vector3 Vector3::operator+(const Vector3& v) const

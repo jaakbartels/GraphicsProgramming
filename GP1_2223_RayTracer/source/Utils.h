@@ -12,37 +12,47 @@ namespace dae
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			float a { Vector3::Dot(ray.direction, ray.direction) };
-			Vector3 oDiff{ ray.origin - sphere.origin };
-			float b { 2 * Vector3::Dot(ray.direction, oDiff) };
-			float c { Vector3::Dot(oDiff, oDiff) - sphere.radius * sphere.radius};
+			float t0, t1;
 
-			//d is the discriminant of the equation
-			float d = b * b - 4 * a * c;
-
-			//We are only interested in full intersection (so discriminant > 0).
-			if (d > 0)
+			Vector3 L = sphere.origin - ray.origin;
+			float tca = Vector3::Dot(L, ray.direction);
+			if (tca < 0)
 			{
-				//Use subtraction, except when t < tMin, then use addition for t.
-				float t = (-b - sqrtf(d)) / 2 / a;
-
-				if (t < ray.min)
-				{
-					t = (-b + sqrtf(d)) / 2 / a;
-				}
-
-				if (t>= ray.min && t <= ray.max)
-				{
-					hitRecord.t = t;
-					hitRecord.didHit = true;
-					hitRecord.origin = ray.origin + t * ray.direction;
-					hitRecord.materialIndex = sphere.materialIndex;
-					hitRecord.normal = (hitRecord.origin - sphere.origin).Normalized();
-					return true;
-				}
+				return false;
 			}
 
-			return false;
+			float d2 = Vector3::Dot(L, L) - tca * tca;
+			float radius2 = sphere.radius * sphere.radius;
+			if (d2 > radius2) return false;
+
+			float thc = sqrt(radius2 - d2);
+			t0 = tca - thc;
+			t1 = tca + thc;
+
+			if (t0 > t1) std::swap(t0, t1);
+
+			if (t0 < ray.min) {
+				t0 = t1;  //if t0 is negative, let's use t1 instead 
+				if (t0 < ray.min) return false;  //both t0 and t1 are negative 
+			}
+
+			if (t0>ray.max)
+			{
+				return false;
+			}
+
+			if (!ignoreHitRecord)
+			{
+				hitRecord.t = t0;
+				hitRecord.didHit = true;
+				hitRecord.origin = ray.origin + t0 * ray.direction;
+				hitRecord.materialIndex = sphere.materialIndex;
+				hitRecord.normal = (hitRecord.origin - sphere.origin).Normalized();
+			}
+			return true;
+
+
+			//return false;
 		}
 
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
@@ -62,7 +72,7 @@ namespace dae
 			{
 				float t = Vector3::Dot(plane.origin - ray.origin, plane.normal) / dotProduct;
 
-				if (t >= ray.min && t <= ray.max)
+				if (!ignoreHitRecord && t >= ray.min && t <= ray.max)
 				{
 					hitRecord.t = t;
 					hitRecord.didHit = true;
@@ -93,15 +103,17 @@ namespace dae
 
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			if (Vector3::Dot(triangle.normal, ray.direction) == 0)
+			float dotNormalDirection = Vector3::Dot(triangle.normal, ray.direction);
+
+			if (dotNormalDirection == 0)
 			{
 				//Ray is parallel with Plane of triangle => no intersection
 				return false;
 			}
 
-			Vector3 center = (triangle.v0 + triangle.v1 + triangle.v2) / 3.f;
+			Vector3 center = (triangle.v0 + triangle.v1 + triangle.v2) * .3333f;
 			Vector3 l = center - ray.origin;
-			float t = Vector3::Dot(l, triangle.normal) / Vector3::Dot(ray.direction, triangle.normal);
+			float t = Vector3::Dot(l, triangle.normal) / dotNormalDirection;
 
 			if (t < ray.min || t > ray.max)
 			{
@@ -114,7 +126,7 @@ namespace dae
 				&& CheckEdge(triangle.v1, triangle.v2, triangle.normal, p)
 				&& CheckEdge(triangle.v2, triangle.v0, triangle.normal, p))
 			{
-				bool rayHitsFrontSide = (Vector3::Dot(triangle.normal, ray.direction) < 0) ^ ignoreHitRecord;
+				bool rayHitsFrontSide = (dotNormalDirection < 0) ^ ignoreHitRecord;
 				bool hide = (rayHitsFrontSide && triangle.cullMode == TriangleCullMode::FrontFaceCulling) || (!rayHitsFrontSide && triangle.cullMode == TriangleCullMode::BackFaceCulling);
 
 				if (hide)
@@ -181,7 +193,7 @@ namespace dae
 
 			for (int i0 = 0; i0 < n_indices - 2; i0 += 3)
 			{
-				Triangle triangle { mesh.transformedPositions[mesh.indices[i0]], mesh.transformedPositions[mesh.indices[i0 + 1]], mesh.transformedPositions[mesh.indices[i0 + 2]], mesh.transformedNormals[normalsIndex] };
+				Triangle triangle{ mesh.transformedPositions[mesh.indices[i0]], mesh.transformedPositions[mesh.indices[i0 + 1]], mesh.transformedPositions[mesh.indices[i0 + 2]], mesh.transformedNormals[normalsIndex] };
 				triangle.cullMode = mesh.cullMode;
 				triangle.materialIndex = mesh.materialIndex;
 
@@ -204,7 +216,7 @@ namespace dae
 				}
 			}
 
-			if (closestHit.didHit && !ignoreHitRecord)
+			if (!ignoreHitRecord && closestHit.didHit)
 			{
 				hitRecord = closestHit;
 			}
@@ -225,19 +237,20 @@ namespace dae
 		//Direction from target to light
 		inline Vector3 GetDirectionToLight(const Light& light, const Vector3 origin)
 		{
-			
+
 			return light.origin - origin;
 		}
 
 		inline ColorRGB GetRadiance(const Light& light, const Vector3& target)
 		{
-			if(light.type == LightType::Directional)
+			if (light.type == LightType::Directional)
 			{
 				return  light.color * light.intensity;
-			}else
+			}
+			else
 			{
 				Vector3 diff = (light.origin - target);
-				return light.color * (light.intensity/Vector3::Dot(diff,diff));
+				return light.color * (light.intensity / Vector3::Dot(diff, diff));
 			}
 		}
 	}
@@ -283,7 +296,7 @@ namespace dae
 				//read till end of line and ignore all remaining chars
 				file.ignore(1000, '\n');
 
-				if (file.eof()) 
+				if (file.eof())
 					break;
 			}
 
@@ -298,7 +311,7 @@ namespace dae
 				Vector3 edgeV0V2 = positions[i2] - positions[i0];
 				Vector3 normal = Vector3::Cross(edgeV0V1, edgeV0V2);
 
-				if(isnan(normal.x))
+				if (isnan(normal.x))
 				{
 					int k = 0;
 				}

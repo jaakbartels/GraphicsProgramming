@@ -5,6 +5,8 @@
 #include "Vector3.h"
 #include <cmath>
 
+//#define _M_IX64_FP = 1
+
 namespace dae
 {
 	Vector4::Vector4(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
@@ -51,7 +53,11 @@ namespace dae
 
 	Vector4 Vector4::operator+(const Vector4& v) const
 	{
+#if _M_IX64_FP == 1
+		return Vector4(__builtin_ia32_addps(v, this));
+#else
 		return { x + v.x, y + v.y, z + v.z, w + v.w };
+#endif
 	}
 
 	Vector4 Vector4::operator-(const Vector4& v) const

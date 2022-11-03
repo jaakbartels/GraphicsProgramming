@@ -1,4 +1,7 @@
 #include "Scene.h"
+
+#include <algorithm>
+
 #include "Utils.h"
 #include "Material.h"
 
@@ -34,7 +37,7 @@ namespace dae {
 		{
 			HitRecord hitInfo{};
 			GeometryUtils::HitTest_Plane(m_PlaneGeometries[i], ray, hitInfo);
-			if (hitInfo.t < closestHit.t)
+			if (hitInfo.didHit && hitInfo.t < closestHit.t)
 			{
 				closestHit = hitInfo;
 			}
@@ -46,7 +49,7 @@ namespace dae {
 		{
 			HitRecord hitInfo{};
 			GeometryUtils::HitTest_Sphere(m_SphereGeometries[i], ray, hitInfo);
-			if (hitInfo.t < closestHit.t)
+			if (hitInfo.didHit && hitInfo.t < closestHit.t)
 			{
 				closestHit = hitInfo;
 			}
@@ -58,7 +61,7 @@ namespace dae {
 		{
 			HitRecord hitInfo{};
 			GeometryUtils::HitTest_TriangleMesh(m_TriangleMeshGeometries[i], ray, hitInfo);
-			if (hitInfo.t < closestHit.t)
+			if (hitInfo.didHit && hitInfo.t < closestHit.t)
 			{
 				closestHit = hitInfo;
 			}
@@ -67,14 +70,16 @@ namespace dae {
 
 	bool Scene::DoesHit(const Ray& ray) const
 	{
-		for (int i = 0; i < m_SphereGeometries.size(); ++i)
+		const size_t sphereGeometriesSize = m_SphereGeometries.size();
+		for (int i = 0; i < sphereGeometriesSize; ++i)
 		{
 			if (GeometryUtils::HitTest_Sphere(m_SphereGeometries[i], ray))
 			{
 				return true;
 			}
 		}
-		for (int i = 0; i < m_PlaneGeometries.size(); ++i)
+		const size_t planeGeometriesSize = m_PlaneGeometries.size();
+		for (int i = 0; i < planeGeometriesSize; ++i)
 		{
 			if (GeometryUtils::HitTest_Plane(m_PlaneGeometries[i], ray))
 			{
