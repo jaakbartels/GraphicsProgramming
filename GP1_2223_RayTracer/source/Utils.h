@@ -122,17 +122,17 @@ namespace dae
 
 			Vector3 p = ray.origin + t * ray.direction;
 
+			bool rayHitsFrontSide = (dotNormalDirection < 0) ^ ignoreHitRecord;
+			bool hide = (rayHitsFrontSide && triangle.cullMode == TriangleCullMode::FrontFaceCulling) || (!rayHitsFrontSide && triangle.cullMode == TriangleCullMode::BackFaceCulling);
+
+			if (hide)
+			{
+				return false;
+			}
 			if (CheckEdge(triangle.v0, triangle.v1, triangle.normal, p)
 				&& CheckEdge(triangle.v1, triangle.v2, triangle.normal, p)
 				&& CheckEdge(triangle.v2, triangle.v0, triangle.normal, p))
 			{
-				bool rayHitsFrontSide = (dotNormalDirection < 0) ^ ignoreHitRecord;
-				bool hide = (rayHitsFrontSide && triangle.cullMode == TriangleCullMode::FrontFaceCulling) || (!rayHitsFrontSide && triangle.cullMode == TriangleCullMode::BackFaceCulling);
-
-				if (hide)
-				{
-					return false;
-				}
 
 				if (!ignoreHitRecord)
 				{
