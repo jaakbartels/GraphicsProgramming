@@ -4,6 +4,8 @@
 #include "Math.h"
 #include "DataTypes.h"
 
+#define MOLLER_TRUMBORE
+
 namespace dae
 {
 	namespace GeometryUtils
@@ -72,13 +74,16 @@ namespace dae
 			{
 				float t = Vector3::Dot(plane.origin - ray.origin, plane.normal) / dotProduct;
 
-				if (!ignoreHitRecord && t >= ray.min && t <= ray.max)
+				if ( t >= ray.min && t <= ray.max)
 				{
+					if(!ignoreHitRecord)
+					{
 					hitRecord.t = t;
 					hitRecord.didHit = true;
 					hitRecord.materialIndex = plane.materialIndex;
 					hitRecord.normal = plane.normal;
 					hitRecord.origin = ray.origin + t * ray.direction;
+					}
 					return true;
 				}
 			}
@@ -103,6 +108,65 @@ namespace dae
 
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
+#ifdef MOLLER_TRUMBORE
+			// Möller–Trumbore intersection algorithm
+			const Vector3 edge1{ triangle.v1 - triangle.v0 };
+			const Vector3 edge2{ triangle.v2 - triangle.v0 };
+
+			const Vector3 h{ Vector3::Cross(ray.direction, edge2) };
+			const float a{ Vector3::Dot(edge1, h) };
+
+			if (a < -FLT_EPSILON)
+			{
+				// Backface hit
+				if (!ignoreHitRecord && triangle.cullMode == TriangleCullMode::BackFaceCulling)
+					// Remove the face if it's "culled" away
+					return false;
+				if (ignoreHitRecord && triangle.cullMode == TriangleCullMode::FrontFaceCulling)
+					// Shadow rays (ignorehitrecord true) have inverted culling
+					return false;
+			}
+			else if (a > FLT_EPSILON)
+			{
+				// Frontface hit
+				if (!ignoreHitRecord && triangle.cullMode == TriangleCullMode::FrontFaceCulling)
+					// Remove the face if it's "culled" away
+					return false;
+				if (ignoreHitRecord && triangle.cullMode == TriangleCullMode::BackFaceCulling)
+					// Shadow rays (ignorehitrecord true) have inverted culling
+					return false;
+			}
+			else
+			{
+				return false;
+			}
+
+			const float f{ 1.0f / a };
+			const Vector3 s{ ray.origin - triangle.v0 };
+			const float u{ f * Vector3::Dot(s, h) };
+
+			if (u < 0.0f || u > 1.0f)
+				return false;
+
+			const Vector3 q{ Vector3::Cross(s, edge1) };
+			const float v{ f * Vector3::Dot(ray.direction, q) };
+
+			if (v < 0.0f || u + v > 1.0f)
+				return false;
+
+			const float t{ f * Vector3::Dot(edge2, q) };
+			if (t > ray.min && t < ray.max)
+			{
+				if (ignoreHitRecord) return true;
+				hitRecord.didHit = true;
+				hitRecord.materialIndex = triangle.materialIndex;
+				hitRecord.origin = ray.origin + (t * ray.direction);
+				hitRecord.normal = triangle.normal;
+				hitRecord.t = t;
+				return true;
+			}
+			return false;
+#else
 			float dotNormalDirection = Vector3::Dot(triangle.normal, ray.direction);
 
 			if (dotNormalDirection == 0)
@@ -146,6 +210,8 @@ namespace dae
 			}
 
 			return false;
+#endif
+
 		}
 
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray)
