@@ -1,5 +1,5 @@
 */bin/
-*.obj
+*/obj/
 TempFiles/
 .vs/
 **/x64/**
