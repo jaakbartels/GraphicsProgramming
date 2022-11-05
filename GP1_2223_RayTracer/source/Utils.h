@@ -4,7 +4,7 @@
 #include "Math.h"
 #include "DataTypes.h"
 
-#define MOLLER_TRUMBORE
+//#define MOLLER_TRUMBORE
 
 namespace dae
 {
@@ -224,20 +224,20 @@ namespace dae
 
 		inline bool SlabTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
 		{
-			float tx1 = (mesh.transformedMinAABB.x - ray.origin.x) / ray.direction.x;
-			float tx2 = (mesh.transformedMaxAABB.x - ray.origin.x) / ray.direction.x;
+			float tx1 = (mesh.transformedMinAABB.x() - ray.origin.x()) / ray.direction.x();
+			float tx2 = (mesh.transformedMaxAABB.x() - ray.origin.x()) / ray.direction.x();
 
 			float tmin = std::min(tx1, tx2);
 			float tmax = std::max(tx1, tx2);
 
-			float ty1 = (mesh.transformedMinAABB.y - ray.origin.y) / ray.direction.y;
-			float ty2 = (mesh.transformedMaxAABB.y - ray.origin.y) / ray.direction.y;
+			float ty1 = (mesh.transformedMinAABB.y() - ray.origin.y()) / ray.direction.y();
+			float ty2 = (mesh.transformedMaxAABB.y() - ray.origin.y()) / ray.direction.y();
 
 			tmin = std::max(tmin, std::min(ty1, ty2));
 			tmax = std::min(tmax, std::max(ty1, ty2));
 
-			float tz1 = (mesh.transformedMinAABB.z - ray.origin.z) / ray.direction.z;
-			float tz2 = (mesh.transformedMaxAABB.z - ray.origin.z) / ray.direction.z;
+			float tz1 = (mesh.transformedMinAABB.z() - ray.origin.z()) / ray.direction.z();
+			float tz2 = (mesh.transformedMaxAABB.z() - ray.origin.z()) / ray.direction.z();
 
 			tmin = std::max(tmin, std::min(tz1, tz2));
 			tmax = std::min(tmax, std::max(tz1, tz2));
@@ -377,13 +377,13 @@ namespace dae
 				Vector3 edgeV0V2 = positions[i2] - positions[i0];
 				Vector3 normal = Vector3::Cross(edgeV0V1, edgeV0V2);
 
-				if (isnan(normal.x))
+				if (isnan(normal.x()))
 				{
 					int k = 0;
 				}
 
 				normal.Normalize();
-				if (isnan(normal.x))
+				if (isnan(normal.x()))
 				{
 					int k = 0;
 				}

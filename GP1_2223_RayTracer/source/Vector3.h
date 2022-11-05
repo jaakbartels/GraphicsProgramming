@@ -1,15 +1,19 @@
 #pragma once
+#include <xmmintrin.h>
 
 namespace dae
 {
 	struct Vector4;
-	struct Vector3
+	struct Vector3 
 	{
-		float x{};
-		float y{};
-		float z{};
+		__m128 v{};
+
+		float x() const { return v.m128_f32[0]; }
+		float y() const { return v.m128_f32[1]; }
+		float z() const { return v.m128_f32[2]; }
 
 		Vector3() = default;
+		Vector3(__m128 v);
 		Vector3(float _x, float _y, float _z);
 		Vector3(const Vector3& from, const Vector3& to);
 		Vector3(const Vector4& v);
@@ -55,6 +59,6 @@ namespace dae
 	//Global Operators
 	inline Vector3 operator*(float scale, const Vector3& v)
 	{
-		return { v.x * scale, v.y * scale, v.z * scale };
+		return { v.x() * scale, v.y() * scale, v.z() * scale};
 	}
 }

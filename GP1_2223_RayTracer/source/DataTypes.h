@@ -184,23 +184,23 @@ namespace dae
 			Vector3 tMinAABB = finalTransform.TransformPoint(minAABB);
 			Vector3 tMaxAABB = tMinAABB;
 
-			Vector3 tAABB = finalTransform.TransformPoint(maxAABB.x, minAABB.y, minAABB.z);
+			Vector3 tAABB = finalTransform.TransformPoint(maxAABB.x(), minAABB.y(), minAABB.z());
 			tMinAABB = Vector3::Min(tAABB, tMinAABB);
 			tMaxAABB = Vector3::Max(tAABB, tMaxAABB);
 
-			tAABB = finalTransform.TransformPoint(maxAABB.x, minAABB.y, maxAABB.z);
+			tAABB = finalTransform.TransformPoint(maxAABB.x(), minAABB.y(), maxAABB.z());
 			tMinAABB = Vector3::Min(tAABB, tMinAABB);
 			tMaxAABB = Vector3::Max(tAABB, tMaxAABB);
 
-			tAABB = finalTransform.TransformPoint(minAABB.x, minAABB.y, maxAABB.z);
+			tAABB = finalTransform.TransformPoint(minAABB.x(), minAABB.y(), maxAABB.z());
 			tMinAABB = Vector3::Min(tAABB, tMinAABB);
 			tMaxAABB = Vector3::Max(tAABB, tMaxAABB);
 
-			tAABB = finalTransform.TransformPoint(minAABB.x, maxAABB.y, minAABB.z);
+			tAABB = finalTransform.TransformPoint(minAABB.x(), maxAABB.y(), minAABB.z());
 			tMinAABB = Vector3::Min(tAABB, tMinAABB);
 			tMaxAABB = Vector3::Max(tAABB, tMaxAABB);
 
-			tAABB = finalTransform.TransformPoint(maxAABB.x, maxAABB.y, minAABB.z);
+			tAABB = finalTransform.TransformPoint(maxAABB.x(), maxAABB.y(), minAABB.z());
 			tMinAABB = Vector3::Min(tAABB, tMinAABB);
 			tMaxAABB = Vector3::Max(tAABB, tMaxAABB);
 
@@ -208,7 +208,7 @@ namespace dae
 			tMinAABB = Vector3::Min(tAABB, tMinAABB);
 			tMaxAABB = Vector3::Max(tAABB, tMaxAABB);
 
-			tAABB = finalTransform.TransformPoint(minAABB.x, maxAABB.y, minAABB.z);
+			tAABB = finalTransform.TransformPoint(minAABB.x(), maxAABB.y(), minAABB.z());
 			tMinAABB = Vector3::Min(tAABB, tMinAABB);
 			tMaxAABB = Vector3::Max(tAABB, tMaxAABB);
 
