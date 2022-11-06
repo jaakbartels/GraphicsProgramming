@@ -1,18 +1,32 @@
 #pragma once
 
+#ifdef SIMD
+#include <xmmintrin.h>
+#endif
+
 namespace dae
 {
 	struct Vector4;
 	struct Vector3
 	{
+#ifdef SIMD
+		union
+		{
+			__m128 m{};
+			struct { float x, y, z; };
+		};
+#else
 		float x{};
 		float y{};
 		float z{};
-
+#endif
 		Vector3() = default;
 		Vector3(float _x, float _y, float _z);
 		Vector3(const Vector3& from, const Vector3& to);
 		Vector3(const Vector4& v);
+#ifdef SIMD
+		Vector3(__m128 _m);
+#endif
 
 		float Magnitude() const;
 		float SqrMagnitude() const;

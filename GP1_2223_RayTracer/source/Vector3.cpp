@@ -16,6 +16,10 @@ namespace dae {
 	Vector3::Vector3(const Vector4& v) : x(v.x), y(v.y), z(v.z){}
 
 	Vector3::Vector3(const Vector3& from, const Vector3& to) : x(to.x - from.x), y(to.y - from.y), z(to.z - from.z){}
+#ifdef SIMD
+	Vector3::Vector3(__m128 _m) : m{_m}{}
+#else
+#endif
 
 	float Vector3::Magnitude() const
 	{
@@ -105,12 +109,20 @@ namespace dae {
 
 	Vector3 Vector3::operator+(const Vector3& v) const
 	{
+#ifdef SIMD	
+		return { _mm_add_ps(m, v.m) };
+#else
 		return { x + v.x, y + v.y, z + v.z };
+#endif
 	}
 
 	Vector3 Vector3::operator-(const Vector3& v) const
 	{
+#ifdef SIMD
+		return { _mm_sub_ps(m, v.m)};
+#else
 		return { x - v.x, y - v.y, z - v.z };
+#endif
 	}
 
 	Vector3 Vector3::operator-() const

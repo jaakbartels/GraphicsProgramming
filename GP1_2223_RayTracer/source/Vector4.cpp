@@ -5,13 +5,14 @@
 #include "Vector3.h"
 #include <cmath>
 
-//#define _M_IX64_FP = 1
-
 namespace dae
 {
 	Vector4::Vector4(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
 	Vector4::Vector4(const Vector3& v, float _w) : x(v.x), y(v.y), z(v.z), w(_w) {}
 
+#ifdef SIMD
+	Vector4::Vector4(__m128 _m) : m{ _m } {}
+#endif
 	float Vector4::Magnitude() const
 	{
 		return sqrtf(x * x + y * y + z * z + w * w);
@@ -53,8 +54,8 @@ namespace dae
 
 	Vector4 Vector4::operator+(const Vector4& v) const
 	{
-#if _M_IX64_FP == 1
-		return Vector4(__builtin_ia32_addps(v, this));
+#ifdef SIMD
+		return { _mm_add_ps(m, v.m)};
 #else
 		return { x + v.x, y + v.y, z + v.z, w + v.w };
 #endif
@@ -62,15 +63,23 @@ namespace dae
 
 	Vector4 Vector4::operator-(const Vector4& v) const
 	{
+#ifdef SIMD
+		return {_mm_sub_ps(m, v.m)};
+#else
 		return { x - v.x, y - v.y, z - v.z, w - v.w };
+#endif
 	}
 
 	Vector4& Vector4::operator+=(const Vector4& v)
 	{
+#ifdef SIMD
+		m = _mm_add_ps(m, v.m);
+#else
 		x += v.x;
 		y += v.y;
 		z += v.z;
 		w += v.w;
+#endif
 		return *this;
 	}
 
