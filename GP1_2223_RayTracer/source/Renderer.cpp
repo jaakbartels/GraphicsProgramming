@@ -28,11 +28,6 @@ Renderer::Renderer(SDL_Window * pWindow) :
 
 void Renderer::Render(Scene* pScene) const
 {
-	Render(pScene, 0, m_Width, 0, m_Height);
-}
-
-void Renderer::Render(Scene* pScene, const int fromX, const int toX, const int fromY, const int toY) const
-{
 	Camera& camera = pScene->GetCamera();
 
 	float ar{ float(m_Width * 1.f / m_Height) };

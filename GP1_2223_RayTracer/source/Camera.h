@@ -33,7 +33,7 @@ namespace dae
 
 		Matrix cameraToWorld{};
 
-		const float moveStep = 1.f;
+		const float moveStep = .5f;
 		const float rotateStep = 0.1f;
 		const int mouseThreshold = 2;
 
@@ -52,19 +52,19 @@ namespace dae
 
 			//Keyboard Input
 			const Uint8* pStates = SDL_GetKeyboardState(nullptr);
-			if(pStates[SDL_SCANCODE_W])
+			if(pStates[SDL_SCANCODE_W] || pStates[SDL_SCANCODE_UP])
 			{
 				origin += moveStep * forward;
 			}
-			if (pStates[SDL_SCANCODE_S])
+			if (pStates[SDL_SCANCODE_S] || pStates[SDL_SCANCODE_DOWN])
 			{
 				origin -= moveStep * forward;
 			}
-			if (pStates[SDL_SCANCODE_D])
+			if (pStates[SDL_SCANCODE_D] || pStates[SDL_SCANCODE_RIGHT])
 			{
 				origin += moveStep * right;
 			}
-			if (pStates[SDL_SCANCODE_A])
+			if (pStates[SDL_SCANCODE_A] || pStates[SDL_SCANCODE_LEFT])
 			{
 				origin -= moveStep * right;
 			}
@@ -87,11 +87,11 @@ namespace dae
 			{
 				if ( mouseY < -mouseThreshold)
 				{
-					origin += moveStep * up;
+					origin -= moveStep * up;
 				}
 				else if ( mouseY > mouseThreshold)
 				{
-					origin -= moveStep * up;
+					origin += moveStep * up;
 				}
 			}
 			else if(mouseState & SDL_BUTTON_LMASK)
@@ -106,11 +106,11 @@ namespace dae
 				}
 				if (mouseX < -mouseThreshold)
 				{
-					pitch += rotateStep;
+					yaw += rotateStep;
 				}
 				else if (mouseX > mouseThreshold)
 				{
-					pitch -= rotateStep;
+					yaw -= rotateStep;
 				}
 			}
 			else if (mouseState & SDL_BUTTON_RMASK)

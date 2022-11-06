@@ -102,12 +102,9 @@ int main(int argc, char* args[])
 				{
 					pRenderer->CycleLightingMode();
 				}
-				break;
-			case SDL_MOUSEBUTTONUP:
-				if (e.button.button == SDL_BUTTON_LEFT)
+				if (e.key.keysym.scancode == SDL_SCANCODE_F6)
 				{
-					//Render a single pixel (for debugging)
-					pRenderer->Render(pScene, e.button.x, e.button.x + 1, e.button.y, e.button.y + 1);
+					pTimer->StartBenchmark();
 				}
 				break;
 			}

@@ -26,7 +26,6 @@ namespace dae
 		Renderer& operator=(Renderer&&) noexcept = delete;
 
 		void Render(Scene* pScene) const;
-		void Render(Scene* pScene, int fromX, int toX, int fromY, int toY) const;
 		void RenderPixel(Scene* pscene, uint32_t pixelIndex, float fov, float aspectRatio, const Camera& camera, const std::vector<Light>& lights, const std::vector<Material*>& materials) const;
 		bool SaveBufferToImage() const;
 
