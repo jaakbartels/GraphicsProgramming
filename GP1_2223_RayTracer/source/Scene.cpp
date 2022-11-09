@@ -29,7 +29,7 @@ namespace dae {
 		m_Materials.clear();
 	}
 
-	void dae::Scene::GetClosestHit(const Ray& ray, HitRecord& closestHit) const
+	void dae::Scene::GetClosestHit(Ray& ray, HitRecord& closestHit)
 	{
 		//Check the planes
 		const size_t planeGeometriesSize{ m_PlaneGeometries.size() };
@@ -68,7 +68,7 @@ namespace dae {
 		}
 	}
 
-	bool Scene::DoesHit(const Ray& ray) const
+	bool Scene::DoesHit(Ray& ray) const
 	{
 		const size_t sphereGeometriesSize = m_SphereGeometries.size();
 		for (int i = 0; i < sphereGeometriesSize; ++i)

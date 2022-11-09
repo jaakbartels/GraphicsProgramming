@@ -12,11 +12,17 @@ namespace dae
 	{
 #pragma region Sphere HitTest
 		//SPHERE HIT-TESTS
-		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
+		inline bool HitTest_Sphere(const Sphere& sphere, Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
 			float t0, t1;
 
 			Vector3 L = sphere.origin - ray.origin;
+
+			if (L.Magnitude() > ray.max + sphere.radius)
+			{
+				return false; 
+			}
+			
 			float tca = Vector3::Dot(L, ray.direction);
 			if (tca < 0)
 			{
@@ -43,6 +49,8 @@ namespace dae
 				return false;
 			}
 
+			ray.max = t0; 
+
 			if (!ignoreHitRecord)
 			{
 				hitRecord.t = t0;
@@ -52,12 +60,9 @@ namespace dae
 				hitRecord.normal = (hitRecord.origin - sphere.origin).Normalized();
 			}
 			return true;
-
-
-			//return false;
 		}
 
-		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
+		inline bool HitTest_Sphere(const Sphere& sphere, Ray& ray)
 		{
 			HitRecord temp{};
 			return HitTest_Sphere(sphere, ray, temp, true);
@@ -65,7 +70,7 @@ namespace dae
 #pragma endregion
 #pragma region Plane HitTest
 		//PLANE HIT-TESTS
-		inline bool HitTest_Plane(const Plane& plane, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
+		inline bool HitTest_Plane(const Plane& plane, Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
 			//todo W1
 			const float dotProduct{ Vector3::Dot(ray.direction, plane.normal) };
@@ -76,6 +81,7 @@ namespace dae
 
 				if ( t >= ray.min && t <= ray.max)
 				{
+					ray.max = t;
 					if(!ignoreHitRecord)
 					{
 					hitRecord.t = t;
@@ -90,7 +96,7 @@ namespace dae
 			return false;
 		}
 
-		inline bool HitTest_Plane(const Plane& plane, const Ray& ray)
+		inline bool HitTest_Plane(const Plane& plane, Ray& ray)
 		{
 			HitRecord temp{};
 			return HitTest_Plane(plane, ray, temp, true);
@@ -106,7 +112,7 @@ namespace dae
 			return Vector3::Dot(normal, Vector3::Cross(edge, pointToSide)) >= 0;
 		}
 
-		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
+		inline bool HitTest_Triangle(const Triangle& triangle, Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
 #ifdef MOLLER_TRUMBORE
 			// Möller–Trumbore intersection algorithm
@@ -157,6 +163,7 @@ namespace dae
 			const float t{ f * Vector3::Dot(edge2, q) };
 			if (t > ray.min && t < ray.max)
 			{
+				ray.max = t;
 				if (ignoreHitRecord) return true;
 				hitRecord.didHit = true;
 				hitRecord.materialIndex = triangle.materialIndex;
@@ -169,7 +176,7 @@ namespace dae
 #else
 			float dotNormalDirection = Vector3::Dot(triangle.normal, ray.direction);
 
-			if (dotNormalDirection == 0)
+			if (std::abs(dotNormalDirection) < FLT_EPSILON)
 			{
 				//Ray is parallel with Plane of triangle => no intersection
 				return false;
@@ -197,6 +204,7 @@ namespace dae
 				&& CheckEdge(triangle.v1, triangle.v2, triangle.normal, p)
 				&& CheckEdge(triangle.v2, triangle.v0, triangle.normal, p))
 			{
+				ray.max = t;
 
 				if (!ignoreHitRecord)
 				{
@@ -214,7 +222,7 @@ namespace dae
 
 		}
 
-		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray)
+		inline bool HitTest_Triangle(const Triangle& triangle, Ray& ray)
 		{
 			HitRecord temp{};
 			return HitTest_Triangle(triangle, ray, temp, true);
@@ -245,7 +253,7 @@ namespace dae
 			return tmax > 0 && tmax >= tmin;
 		}
 
-		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
+		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
 			if (!SlabTest_TriangleMesh(mesh, ray))
 			{
@@ -290,7 +298,7 @@ namespace dae
 			return closestHit.didHit;
 		}
 
-		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
+		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, Ray& ray)
 		{
 			HitRecord temp{};
 			return HitTest_TriangleMesh(mesh, ray, temp, true);

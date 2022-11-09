@@ -34,8 +34,8 @@ namespace dae
 		}
 
 		Camera& GetCamera() { return m_Camera; }
-		void GetClosestHit(const Ray& ray, HitRecord& closestHit) const;
-		bool DoesHit(const Ray& ray) const;
+		void GetClosestHit(Ray& ray, HitRecord& closestHit);
+		bool DoesHit(Ray& ray) const;
 
 		const std::vector<Plane>& GetPlaneGeometries() const { return m_PlaneGeometries; }
 		const std::vector<Sphere>& GetSphereGeometries() const { return m_SphereGeometries; }
