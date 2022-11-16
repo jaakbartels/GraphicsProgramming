@@ -47,6 +47,9 @@
     <ClInclude Include="Texture.h">
       <Filter>Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -68,6 +71,9 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Triangle.cpp">
+      <Filter>Math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

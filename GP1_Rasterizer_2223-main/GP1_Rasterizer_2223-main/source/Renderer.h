@@ -5,6 +5,7 @@
 
 #include "Camera.h"
 #include "DataTypes.h"
+#include "Triangle.h"
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -29,6 +30,8 @@ namespace dae
 		Renderer& operator=(Renderer&&) noexcept = delete;
 
 		void Update(Timer* pTimer);
+		Triangle NdcToScreenSpace(Triangle triangle_ndc) const;
+		void Render_W1_Part1();
 		void Render();
 
 		bool SaveBufferToImage() const;
