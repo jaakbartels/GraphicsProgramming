@@ -39,19 +39,7 @@ void Renderer::Update(Timer* pTimer)
 	m_Camera.Update(pTimer);
 }
 
-Triangle Renderer::NdcToScreenSpace(Triangle triangle_ndc) const
-{
-	Triangle result;
-	for (int i=0; i<3; ++i)
-	{
-		result[i].x = (triangle_ndc[i].x + 1.f) / 2.f * m_Width;
-		result[i].y = (1.f-triangle_ndc[i].y ) / 2.f * m_Height;
-		result[i].z = triangle_ndc[i].z;
-	}
-	return result;
-}
-
-void Renderer::Render_W1_Part1()
+void Renderer::Render_W1_Part1() const
 {
 	Triangle const triangle_ndc
 	{
@@ -63,11 +51,12 @@ void Renderer::Render_W1_Part1()
 	std::vector<Triangle> triangles{ triangle_ndc };
 
 	auto numTriangles = triangles.size();
+	Triangle triangle_screen;
 
 	//RENDER LOGIC
 	for (size_t t = 0; t < numTriangles; ++t) 
 	{
-		Triangle triangle_screen = NdcToScreenSpace(triangles[t]);
+		NdcToScreenSpace(triangles[t], triangle_screen);
 
 		for (int px{}; px < m_Width; ++px)
 		{
@@ -111,9 +100,19 @@ void Renderer::Render()
 	SDL_UpdateWindowSurface(m_pWindow);
 }
 
-void Renderer::VertexTransformationFunction(const std::vector<Vertex>& vertices_in, std::vector<Vertex>& vertices_out) const
+void Renderer::WorldToNdcSpace(const Triangle& vertices_in, Triangle& vertices_out) const
 {
 	//Todo > W1 Projection Stage
+}
+
+void Renderer::NdcToScreenSpace(const Triangle& triangle_ndc, Triangle& result) const
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		result[i].x = (triangle_ndc[i].x + 1.f) / 2.f * m_Width;
+		result[i].y = (1.f - triangle_ndc[i].y) / 2.f * m_Height;
+		result[i].z = triangle_ndc[i].z;
+	}
 }
 
 bool Renderer::SaveBufferToImage() const
