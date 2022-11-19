@@ -52,13 +52,13 @@ void Renderer::Render()
 
 	//Renderer_W1_01();
 	//Renderer_W1_02();	
-	Renderer_W1_03();
+	//Renderer_W1_03();
 	//Renderer_W1_04();
 	//Renderer_W1_05();
 
 	//Renderer_W2_01();
 	//Renderer_W2_02();
-	//Renderer_W2_03();
+	Renderer_W2_03();
 
 	//@END
 	//Update SDL Surface
