@@ -30,6 +30,7 @@ Renderer::Renderer(SDL_Window* pWindow) :
 
 	//initialize Texture
 	//m_pTexture = new Texture{ "Resources/uv_grid_2.png" };
+	m_pTexture = Texture::LoadFromFile("Resources/uv_grid_2.png");
 	m_pTexture->Texture::LoadFromFile("Resources/uv_grid_2.png");
 }
 

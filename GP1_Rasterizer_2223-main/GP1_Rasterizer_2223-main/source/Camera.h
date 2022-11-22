@@ -52,7 +52,7 @@ namespace dae
 
 
 			//Inverse(ONB) => ViewMatrix
-			viewMatrix = Matrix::Inverse(invViewMatrix);
+			//viewMatrix = Matrix::Inverse(invViewMatrix);
 			/*viewMatrix = Matrix{
 				{right.x, right.y, right.z, 0 },
 				{up.x, up.y, up.z, 0 },
