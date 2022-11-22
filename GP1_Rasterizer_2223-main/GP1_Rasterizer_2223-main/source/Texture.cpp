@@ -1,50 +1,59 @@
 #include "Texture.h"
 #include "Vector2.h"
 #include <SDL_image.h>
+#include <assert.h>
 
 namespace dae
 {
-    Texture::Texture(SDL_Surface* pSurface) :
-        m_pSurface{ pSurface },
-        m_pSurfacePixels{ (uint32_t*)pSurface->pixels }
-    {
-    }
+	Texture::Texture(SDL_Surface* pSurface) :
+		m_pSurface{ pSurface },
+		m_pSurfacePixels{ (uint32_t*)pSurface->pixels }
+	{
+	}
 
-    Texture::~Texture()
-    {
-        if (m_pSurface)
-        {
-            SDL_FreeSurface(m_pSurface);
-            m_pSurface = nullptr;
-        }
-    }
+	Texture::~Texture()
+	{
+		if (m_pSurface)
+		{
+			SDL_FreeSurface(m_pSurface);
+			m_pSurface = nullptr;
+		}
+	}
 
-    Texture* Texture::LoadFromFile(const std::string& path)
-    {
-        //TODO
-        //Load SDL_Surface using IMG_LOAD
-        SDL_Surface* surface{};
-        surface = IMG_Load(path.c_str());
-        //Create & Return a new Texture Object (using SDL_Surface)
-        Texture* texture{ new Texture{surface} };
+	Texture* Texture::LoadFromFile(const std::string& path)
+	{
+		//TODO
+		//Load SDL_Surface using IMG_LOAD
+		//Create & Return a new Texture Object (using SDL_Surface)
 
-        return texture;
-    }
+		const auto loadedImage{ IMG_Load(path.c_str()) };
+		assert(loadedImage != nullptr && "There was no file found");
 
-    ColorRGB Texture::Sample(const Vector2& uv) const
-    {
-        //TODO
-        //Sample the correct texel for the given uv
-        const float u{ uv.x * m_pSurface->w };
-        const float v{ uv.y * m_pSurface->h };
-        const int pixel{ int(uv.x + (uv.y * m_pSurface->w)) };
-        Uint8 r{}, g{}, b{};
-        SDL_GetRGB(m_pSurfacePixels[pixel], m_pSurface->format, &r, &g, &b);
-        ColorRGB color{};
-        color.r = r / 255.f;
-        color.g = g / 255.f;
-        color.b = b / 255.f;
+		Texture* imageTexture = new Texture{ loadedImage };
+		return imageTexture;
+	}
 
-        return color;
-    }
+	ColorRGB Texture::Sample(const Vector2& uv) const
+	{
+		//TODO
+		//Sample the correct texel for the given uv
+		const int textureWidth{ m_pSurface->w };
+		const int textureHeight{ m_pSurface->h };
+
+		const Vector2 convertedUV{ static_cast<float> (static_cast<int> (uv.x * textureWidth)),static_cast<float>(static_cast<int> (uv.y * textureHeight)) };
+		const auto desiredPixel{ m_pSurfacePixels[static_cast<size_t>(convertedUV.y * textureWidth + convertedUV.x)] };
+
+		Uint8 redValue{};
+		Uint8 blueValue{};
+		Uint8 greenValue{};
+
+		SDL_GetRGB(desiredPixel, m_pSurface->format, &redValue, &blueValue, &greenValue);
+
+		ColorRGB desiredColor{ static_cast<float>(redValue), static_cast<float>(blueValue), static_cast<float>(greenValue) };
+		desiredColor.r /= 255.f;
+		desiredColor.g /= 255.f;
+		desiredColor.b /= 255.f;
+
+		return desiredColor;
+	}
 }

@@ -418,8 +418,8 @@ void Renderer::Renderer_W2_01()
 	SDL_FillRect(m_pBackBuffer, NULL, hexColor);
 
 	std::fill_n(m_pDepthBufferPixels, m_Width * m_Height, FLT_MAX);
-	std::vector<Vertex> vertices_screen{};
-	VertexTransformationFunctionW2(meshes_world, vertices_screen);
+	
+	VertexTransformationFunction(meshes_world);
 
 	for (int i{}; i < meshes_world[0].indices.size(); i += 3)
 	{
@@ -427,9 +427,9 @@ void Renderer::Renderer_W2_01()
 		const int indexA{ int(meshes_world[0].indices[i]) };
 		const int indexB{ int(meshes_world[0].indices[i + 1]) };
 		const int indexC{ int(meshes_world[0].indices[i + 2]) };
-		const Vector3 A{ vertices_screen[indexA].position };
-		const Vector3 B{ vertices_screen[indexB].position };
-		const Vector3 C{ vertices_screen[indexC].position };
+		const Vector3 A{ meshes_world[0].vertices_out[indexA].position};
+		const Vector3 B{ meshes_world[0].vertices_out[indexB].position };
+		const Vector3 C{ meshes_world[0].vertices_out[indexC].position };
 
 		float topLeftX = std::min(A.x, std::min(B.x, C.x));
 		float topLeftY = std::max(A.y, std::max(B.y, C.y));
@@ -474,10 +474,10 @@ void Renderer::Renderer_W2_01()
 
 						/*m_pDepthBufferPixels[px + (py * m_Width)] = currentDepth;*/
 
-					ColorRGB interpolatedColor{ vertices_screen[indexA].color * W0 +
-						vertices_screen[indexB].color * W1 + vertices_screen[indexC].color * W2 };
+					ColorRGB interpolatedColor{ meshes_world[0].vertices[indexA].color * W0 +
+						meshes_world[0].vertices[indexB].color* W1 + meshes_world[0].vertices[indexC].color * W2 };
 
-					finalColor = { 1,1,1 };
+					finalColor = interpolatedColor;
 					//Update Color in Buffer
 					finalColor.MaxToOne();
 
@@ -524,15 +524,15 @@ void Renderer::Renderer_W2_02()
 	SDL_FillRect(m_pBackBuffer, NULL, hexColor);
 
 	std::fill_n(m_pDepthBufferPixels, m_Width * m_Height, FLT_MAX);
-	std::vector<Vertex> vertices_screen{};
-	VertexTransformationFunctionW2(meshes_world, vertices_screen);
+	
+	VertexTransformationFunction(meshes_world);
 
 	for (int i{}; i < meshes_world[0].indices.size() - 2; ++i)
 	{
 		//Points of the Triangle
 		const int indexA{ int(meshes_world[0].indices[i]) };
-		int indexB{ int(meshes_world[0].indices[i + 1]) };
-		int indexC{ int(meshes_world[0].indices[i + 2]) };
+		int indexB		{ int(meshes_world[0].indices[i + 1]) };
+		int indexC		{ int(meshes_world[0].indices[i + 2]) };
 
 		if (meshes_world[0].primitiveTopology == PrimitiveTopology::TriangleStrip)
 		{
@@ -542,9 +542,9 @@ void Renderer::Renderer_W2_02()
 			}
 		}
 
-		const Vector3 A{ vertices_screen[indexA].position };
-		const Vector3 B{ vertices_screen[indexB].position };
-		const Vector3 C{ vertices_screen[indexC].position };
+		const Vector3 A{ meshes_world[0].vertices_out[indexA].position };
+		const Vector3 B{ meshes_world[0].vertices_out[indexB].position };
+		const Vector3 C{ meshes_world[0].vertices_out[indexC].position };
 
 		float topLeftX = std::min(A.x, std::min(B.x, C.x));
 		float topLeftY = std::max(A.y, std::max(B.y, C.y));
@@ -589,8 +589,8 @@ void Renderer::Renderer_W2_02()
 
 						/*m_pDepthBufferPixels[px + (py * m_Width)] = currentDepth;*/
 
-					ColorRGB interpolatedColor{ vertices_screen[indexA].color * W0 +
-						vertices_screen[indexB].color * W1 + vertices_screen[indexC].color * W2 };
+					ColorRGB interpolatedColor{ meshes_world[0].vertices[indexA].color * W0 +
+						meshes_world[0].vertices[indexB].color * W1 + meshes_world[0].vertices[indexC].color * W2 };
 
 					finalColor = { 1,1,1 };
 					//Update Color in Buffer
@@ -639,8 +639,7 @@ void Renderer::Renderer_W2_03()
 	SDL_FillRect(m_pBackBuffer, NULL, hexColor);
 
 	std::fill_n(m_pDepthBufferPixels, m_Width * m_Height, FLT_MAX);
-	std::vector<Vertex> vertices_screen{};
-	VertexTransformationFunctionW2(meshes_world, vertices_screen);
+	VertexTransformationFunction(meshes_world);
 
 	for (int i{}; i < meshes_world[0].indices.size() - 2; ++i)
 	{
@@ -657,9 +656,9 @@ void Renderer::Renderer_W2_03()
 			}
 		}
 
-		const Vector3 A{ vertices_screen[indexA].position };
-		const Vector3 B{ vertices_screen[indexB].position };
-		const Vector3 C{ vertices_screen[indexC].position };
+		const Vector3 A{meshes_world[0].vertices_out[indexA].position };
+		const Vector3 B{meshes_world[0].vertices_out[indexB].position};
+		const Vector3 C{meshes_world[0].vertices_out[indexC].position};
 
 		float topLeftX = std::min(A.x, std::min(B.x, C.x));
 		float topLeftY = std::max(A.y, std::max(B.y, C.y));
@@ -696,9 +695,11 @@ void Renderer::Renderer_W2_03()
 					const float W1{ signedAreaParallelogramBC / triangleArea };
 					const float W2{ signedAreaParallelogramCA / triangleArea };
 
-					Vector2 interpolatedUV{ vertices_screen[indexA].uv * W0 +
-						vertices_screen[indexB].uv * W1 + vertices_screen[indexC].uv * W2 };
+					Vector2 interpolatedUV{ meshes_world[0].vertices[indexA].uv * W0 +
+						 meshes_world[0].vertices[indexB].uv * W1 + meshes_world[0].vertices[indexC].uv * W2 };
+					const float finalDepth{ 1 / ((1 / A.z) * W0 + (1 / B.z) * W1 + (1 / C.z) * W2) };
 
+					
 					finalColor = { m_pTexture->Sample(interpolatedUV) };
 					//Update Color in Buffer
 					finalColor.MaxToOne();
@@ -748,37 +749,35 @@ void Renderer::VertexTransformationFunctionW1(const std::vector<Vertex>& vertice
 	}
 }
 
-void Renderer::VertexTransformationFunctionW2(const std::vector<Mesh>& vertices_in, std::vector<Vertex>& vertices_out) const
+void Renderer::VertexTransformationFunction(std::vector<Mesh>& meshes) const
 {
-	//Todo > W1 Projection Stage
-
-	for (const auto& v : vertices_in[0].vertices)
+	for (auto& mesh : meshes)
 	{
-		Vector3 p{};
-
-		//world to view space
-		p = m_Camera.viewMatrix.TransformPoint(v.position);
-
-		//camera settings
-		const float aspectRatio{ float(m_Width) / m_Height };
-		p.x /= (aspectRatio * m_Camera.fov);
-		p.y /= m_Camera.fov;
-
-		//perspective divide
-		if (p.z != 0)
+		for (const auto& vertex : mesh.vertices)
 		{
-			p.x /= p.z;
-			p.y /= p.z;
+			//World Space to View Space
+			Vector3 viewSpaceVertex = m_Camera.viewMatrix.TransformPoint(vertex.position);
+
+			//Conversion to NDC - Perspective Devide (perspective distorion)
+			Vector3 projectedVertex{};
+			projectedVertex.x = viewSpaceVertex.x / viewSpaceVertex.z;
+			projectedVertex.y = viewSpaceVertex.y / viewSpaceVertex.z;
+			projectedVertex.z = viewSpaceVertex.z;
+
+			//With camera setting (screens aren't always squares)
+			const auto aspectRatio = m_Width / float(m_Height);
+			projectedVertex.x = projectedVertex.x / (aspectRatio * m_Camera.fov);
+			projectedVertex.y = projectedVertex.y / m_Camera.fov;
+
+			//Convert to Screen Space
+			Vertex_Out screenSpaceVertex{};
+			screenSpaceVertex.position.x = ((projectedVertex.x + 1) / 2.f) * float(m_Width);
+			screenSpaceVertex.position.y = ((1 - projectedVertex.y) / 2.f) * float(m_Height);
+
+			screenSpaceVertex.color = vertex.color; //Copy the color
+
+			mesh.vertices_out.emplace_back(screenSpaceVertex);
 		}
-		p.z = p.z;
-
-		//to screen space
-		p.x = (p.x + 1) / 2.f * m_Width;
-		p.y = (1 - p.y) / 2.f * m_Height;
-		p.z = p.z;
-
-		//std::cout << p.x << ' ' << p.y << ' ' << p.z << '\n';
-		vertices_out.push_back({ p, v.color });
 	}
 }
 

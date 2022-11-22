@@ -52,7 +52,7 @@ namespace dae
 
 		//Function that transforms the vertices from the mesh from World space to Screen space
 		void VertexTransformationFunctionW1(const std::vector<Vertex>& vertices_in, std::vector<Vertex>& vertices_out) const; //W1 Version
-		void VertexTransformationFunctionW2(const std::vector<Mesh>& vertices_in, std::vector<Vertex>& vertices_out) const; //W2 Version
+		void VertexTransformationFunction(std::vector<Mesh>& meshes) const;
 		bool IsInTriangle(const Vector2& pixel, const Vector2& a, const Vector2& b, const Vector2& c);
 
 		void Renderer_W1_01();
