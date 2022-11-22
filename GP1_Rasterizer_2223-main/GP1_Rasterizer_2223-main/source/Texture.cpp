@@ -26,9 +26,9 @@ namespace dae
         SDL_Surface* surface{};
         surface = IMG_Load(path.c_str());
         //Create & Return a new Texture Object (using SDL_Surface)
-        //Texture* texture{ new Texture{surface} };
+        Texture* texture{ new Texture{surface} };
 
-        return 0;
+        return texture;
     }
 
     ColorRGB Texture::Sample(const Vector2& uv) const
