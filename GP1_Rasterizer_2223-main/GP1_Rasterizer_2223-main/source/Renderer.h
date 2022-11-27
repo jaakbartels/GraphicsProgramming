@@ -64,5 +64,6 @@ namespace dae
 		void Renderer_W2_01();
 		void Renderer_W2_02();
 		void Renderer_W2_03();
+		void Renderer_W3_01();
 	};
 }

@@ -61,6 +61,8 @@ void Renderer::Render()
 	//Renderer_W2_02();
 	Renderer_W2_03();
 
+	//Renderer_W3_01();
+
 	//@END
 	//Update SDL Surface
 	SDL_UnlockSurface(m_pBackBuffer);
@@ -196,7 +198,7 @@ void Renderer::Renderer_W1_03()
 			const float triangleArea = signedAreaAB + signedAreaParallelogramBC + signedAreaParallelogramCA;
 
 			ColorRGB finalColor{ 0.0f, 0.0f, 0.0f };
-			if (signedAreaAB > 0 || signedAreaParallelogramBC > 0 || signedAreaParallelogramCA > 0)
+			if (signedAreaAB > 0 && signedAreaParallelogramBC > 0 && signedAreaParallelogramCA > 0)
 			{
 				const float weightA{ signedAreaAB / triangleArea };
 				const float weightB{ signedAreaParallelogramBC / triangleArea };
@@ -644,26 +646,26 @@ void Renderer::Renderer_W2_03()
 	for (int i{}; i < meshes_world[0].indices.size() - 2; ++i)
 	{
 		//Points of the Triangle
-		const int indexA{ int(meshes_world[0].indices[i]) };
-		int indexB{ int(meshes_world[0].indices[i + 1]) };
-		int indexC{ int(meshes_world[0].indices[i + 2]) };
+		const int index0{ int(meshes_world[0].indices[i]) };
+		int index1{ int(meshes_world[0].indices[i + 1]) };
+		int index2{ int(meshes_world[0].indices[i + 2]) };
 
 		if (meshes_world[0].primitiveTopology == PrimitiveTopology::TriangleStrip)
 		{
 			if (i % 2 != 0)
 			{
-				std::swap(indexB, indexC);
+				std::swap(index1, index2);
 			}
 		}
 
-		const Vector3 A{meshes_world[0].vertices_out[indexA].position };
-		const Vector3 B{meshes_world[0].vertices_out[indexB].position};
-		const Vector3 C{meshes_world[0].vertices_out[indexC].position};
+		const Vector3 V0{meshes_world[0].vertices_out[index0].position };
+		const Vector3 V1{meshes_world[0].vertices_out[index1].position};
+		const Vector3 V2{meshes_world[0].vertices_out[index2].position};
 
-		float topLeftX = std::min(A.x, std::min(B.x, C.x));
-		float topLeftY = std::max(A.y, std::max(B.y, C.y));
-		float bottomRightX = std::max(A.x, std::max(B.x, C.x));
-		float bottomRightY = std::min(A.y, std::min(B.y, C.y));
+		float topLeftX = std::min(V0.x, std::min(V1.x, V2.x));
+		float topLeftY = std::max(V0.y, std::max(V1.y, V2.y));
+		float bottomRightX = std::max(V0.x, std::max(V1.x, V2.x));
+		float bottomRightY = std::min(V0.y, std::min(V1.y, V2.y));
 
 		topLeftX = Clamp(topLeftX, 1.f, float(m_Width - 1));
 		topLeftY = Clamp(topLeftY, 1.f, float(m_Height - 1));
@@ -679,27 +681,142 @@ void Renderer::Renderer_W2_03()
 				ColorRGB finalColor{ 0.0f, 0.0f, 0.0f };
 
 				// Define the edges of the screen triangle
-				const Vector2 AB{ A.GetXY(), B.GetXY() };
-				const Vector2 BC{ B.GetXY(), C.GetXY() };
-				const Vector2 CA{ C.GetXY(), A.GetXY() };
+				const Vector2 V01{ V0.GetXY(), V1.GetXY() };
+				const Vector2 V12{ V1.GetXY(), V2.GetXY() };
+				const Vector2 V20{ V2.GetXY(), V0.GetXY() };
 
-				const float signedAreaAB{ Vector2::Cross(AB, Vector2{ A.GetXY(), pixel}) };
-				const float signedAreaParallelogramBC{ Vector2::Cross(BC, Vector2{ B.GetXY(), pixel}) };
-				const float signedAreaParallelogramCA{ Vector2::Cross(CA, Vector2{ C.GetXY(), pixel}) };
-				const float triangleArea = signedAreaAB + signedAreaParallelogramBC + signedAreaParallelogramCA;
+				const float signedArea2{ Vector2::Cross(V01, Vector2{ V0.GetXY(), pixel}) };
+				const float signedArea0{ Vector2::Cross(V12, Vector2{ V1.GetXY(), pixel}) };
+				const float signedArea1{ Vector2::Cross(V20, Vector2{ V2.GetXY(), pixel}) };
+				const float doubleOfTriangleArea = signedArea2 + signedArea0 + signedArea1;
 
 
-				if (signedAreaAB > 0 && signedAreaParallelogramBC > 0 && signedAreaParallelogramCA > 0)
+				if (signedArea2 > 0 && signedArea0 > 0 && signedArea1 > 0)
 				{
-					const float W0{ signedAreaAB / triangleArea };
-					const float W1{ signedAreaParallelogramBC / triangleArea };
-					const float W2{ signedAreaParallelogramCA / triangleArea };
+					const float w2{ signedArea2 / doubleOfTriangleArea };
+					const float w0{ signedArea0 / doubleOfTriangleArea };
+					const float w1{ signedArea1 / doubleOfTriangleArea };
 
-					Vector2 interpolatedUV{ meshes_world[0].vertices[indexA].uv * W0 +
-						 meshes_world[0].vertices[indexB].uv * W1 + meshes_world[0].vertices[indexC].uv * W2 };
-					const float finalDepth{ 1 / ((1 / A.z) * W0 + (1 / B.z) * W1 + (1 / C.z) * W2) };
+					const float interpolatedZ{ 1 / ((1 / V0.z) * w0 + (1 / V1.z) * w1 + (1 / V2.z) * w2) };
 
-					
+					Vector2 interpolatedUV{
+						meshes_world[0].vertices[index0].uv / V0.z * w0
+						+ meshes_world[0].vertices[index1].uv / V1.z * w1
+						+ meshes_world[0].vertices[index2].uv / V2.z * w2 };
+
+					interpolatedUV *= interpolatedZ;
+										
+					finalColor = { m_pTexture->Sample(interpolatedUV) };
+					//Update Color in Buffer
+					finalColor.MaxToOne();
+
+					m_pBackBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBackBuffer->format,
+						static_cast<uint8_t>(finalColor.r * 255),
+						static_cast<uint8_t>(finalColor.g * 255),
+						static_cast<uint8_t>(finalColor.b * 255));
+				}
+
+			}
+		}
+	}
+}
+
+void Renderer::Renderer_W3_01()
+{
+	std::vector<Mesh> meshes_world
+	{
+		Mesh{
+				{
+				Vertex{{-3, 3, -2}, {1,1,1}, {0,0}},
+				Vertex{{0,3,-2}, {1,1,1}, {0.5,0}},
+				Vertex{{3,3,-2}, {1,1,1}, {1,0}},
+				Vertex{{-3,0,-2}, {1,1,1}, {0,0.5}},
+				Vertex{{0,0,-2}, {1,1,1}, {0.5,0.5}},
+				Vertex{{3,0,-2}, {1,1,1}, {1,0.5}},
+				Vertex{{-3,-3,-2}, {1,1,1}, {0,1}},
+				Vertex{{0,-3,-2}, {1,1,1}, {0.5,1}},
+				Vertex{{3,-3,-2}, {1,1,1}, {1,1}}
+		},
+			{
+				3,0,4,1,5,2,
+				2,6,
+				6,3,7,4,8,5
+			},
+			PrimitiveTopology::TriangleStrip
+		}
+	};
+
+	//Clear backBuffer
+	ColorRGB clearColor{ 100, 100, 100 };
+	uint32_t hexColor = 0xFF000000 | (uint32_t)clearColor.b << 8 | (uint32_t)clearColor.g << 16 | (uint32_t)clearColor.r;
+	SDL_FillRect(m_pBackBuffer, NULL, hexColor);
+
+	std::fill_n(m_pDepthBufferPixels, m_Width * m_Height, FLT_MAX);
+	VertexTransformationFunction(meshes_world);
+
+	for (int i{}; i < meshes_world[0].indices.size() - 2; ++i)
+	{
+		//Points of the Triangle
+		const int index0{ int(meshes_world[0].indices[i]) };
+		int index1{ int(meshes_world[0].indices[i + 1]) };
+		int index2{ int(meshes_world[0].indices[i + 2]) };
+
+		if (meshes_world[0].primitiveTopology == PrimitiveTopology::TriangleStrip)
+		{
+			if (i % 2 != 0)
+			{
+				std::swap(index1, index2);
+			}
+		}
+
+		const Vector3 V0{ meshes_world[0].vertices_out[index0].position };
+		const Vector3 V1{ meshes_world[0].vertices_out[index1].position };
+		const Vector3 V2{ meshes_world[0].vertices_out[index2].position };
+
+		float topLeftX = std::min(V0.x, std::min(V1.x, V2.x));
+		float topLeftY = std::max(V0.y, std::max(V1.y, V2.y));
+		float bottomRightX = std::max(V0.x, std::max(V1.x, V2.x));
+		float bottomRightY = std::min(V0.y, std::min(V1.y, V2.y));
+
+		topLeftX = Clamp(topLeftX, 1.f, float(m_Width - 1));
+		topLeftY = Clamp(topLeftY, 1.f, float(m_Height - 1));
+		bottomRightX = Clamp(bottomRightX, 1.f, float(m_Width - 1));
+		bottomRightY = Clamp(bottomRightY, 1.f, float(m_Height - 1));
+
+		//RENDER LOGIC
+		for (int px{ int(topLeftX) }; px < bottomRightX; ++px)
+		{
+			for (int py{ int(bottomRightY) }; py < topLeftY; ++py)
+			{
+				Vector2 pixel{ float(px), float(py) };
+				ColorRGB finalColor{ 0.0f, 0.0f, 0.0f };
+
+				// Define the edges of the screen triangle
+				const Vector2 V01{ V0.GetXY(), V1.GetXY() };
+				const Vector2 V12{ V1.GetXY(), V2.GetXY() };
+				const Vector2 V20{ V2.GetXY(), V0.GetXY() };
+
+				const float signedArea2{ Vector2::Cross(V01, Vector2{ V0.GetXY(), pixel}) };
+				const float signedArea0{ Vector2::Cross(V12, Vector2{ V1.GetXY(), pixel}) };
+				const float signedArea1{ Vector2::Cross(V20, Vector2{ V2.GetXY(), pixel}) };
+				const float doubleOfTriangleArea = signedArea2 + signedArea0 + signedArea1;
+
+
+				if (signedArea2 > 0 && signedArea0 > 0 && signedArea1 > 0)
+				{
+					const float w2{ signedArea2 / doubleOfTriangleArea };
+					const float w0{ signedArea0 / doubleOfTriangleArea };
+					const float w1{ signedArea1 / doubleOfTriangleArea };
+
+					const float interpolatedZ{ 1 / ((1 / V0.z) * w0 + (1 / V1.z) * w1 + (1 / V2.z) * w2) };
+
+					Vector2 interpolatedUV{
+						meshes_world[0].vertices[index0].uv / V0.z * w0
+						+ meshes_world[0].vertices[index1].uv / V1.z * w1
+						+ meshes_world[0].vertices[index2].uv / V2.z * w2 };
+
+					interpolatedUV *= interpolatedZ;
+
 					finalColor = { m_pTexture->Sample(interpolatedUV) };
 					//Update Color in Buffer
 					finalColor.MaxToOne();
@@ -758,7 +875,7 @@ void Renderer::VertexTransformationFunction(std::vector<Mesh>& meshes) const
 			//World Space to View Space
 			Vector3 viewSpaceVertex = m_Camera.viewMatrix.TransformPoint(vertex.position);
 
-			//Conversion to NDC - Perspective Devide (perspective distorion)
+			//Conversion to NDC - Perspective Divide (perspective distortion)
 			Vector3 projectedVertex{};
 			projectedVertex.x = viewSpaceVertex.x / viewSpaceVertex.z;
 			projectedVertex.y = viewSpaceVertex.y / viewSpaceVertex.z;
@@ -773,6 +890,7 @@ void Renderer::VertexTransformationFunction(std::vector<Mesh>& meshes) const
 			Vertex_Out screenSpaceVertex{};
 			screenSpaceVertex.position.x = ((projectedVertex.x + 1) / 2.f) * float(m_Width);
 			screenSpaceVertex.position.y = ((1 - projectedVertex.y) / 2.f) * float(m_Height);
+			screenSpaceVertex.position.z = projectedVertex.z;
 
 			screenSpaceVertex.color = vertex.color; //Copy the color
 
