@@ -59,9 +59,9 @@ void Renderer::Render()
 
 	//Renderer_W2_01();
 	//Renderer_W2_02();
-	Renderer_W2_03();
+	//Renderer_W2_03();
 
-	//Renderer_W3_01();
+	Renderer_W3_01();
 
 	//@END
 	//Update SDL Surface
@@ -868,31 +868,18 @@ void Renderer::VertexTransformationFunctionW1(const std::vector<Vertex>& vertice
 
 void Renderer::VertexTransformationFunction(std::vector<Mesh>& meshes) const
 {
+	auto matrix = m_Camera.viewMatrix * m_Camera.projectionMatrix;
+
 	for (auto& mesh : meshes)
 	{
 		for (const auto& vertex : mesh.vertices)
 		{
-			//World Space to View Space
-			Vector3 viewSpaceVertex = m_Camera.viewMatrix.TransformPoint(vertex.position);
+			Vector4 screenSpaceVertex =  matrix.TransformPoint(Vector4{ vertex.position, 1.f });
 
-			//Conversion to NDC - Perspective Divide (perspective distortion)
-			Vector3 projectedVertex{};
-			projectedVertex.x = viewSpaceVertex.x / viewSpaceVertex.z;
-			projectedVertex.y = viewSpaceVertex.y / viewSpaceVertex.z;
-			projectedVertex.z = viewSpaceVertex.z;
-
-			//With camera setting (screens aren't always squares)
-			const auto aspectRatio = m_Width / float(m_Height);
-			projectedVertex.x = projectedVertex.x / (aspectRatio * m_Camera.fov);
-			projectedVertex.y = projectedVertex.y / m_Camera.fov;
-
-			//Convert to Screen Space
-			Vertex_Out screenSpaceVertex{};
-			screenSpaceVertex.position.x = ((projectedVertex.x + 1) / 2.f) * float(m_Width);
-			screenSpaceVertex.position.y = ((1 - projectedVertex.y) / 2.f) * float(m_Height);
-			screenSpaceVertex.position.z = projectedVertex.z;
-
-			screenSpaceVertex.color = vertex.color; //Copy the color
+			//Perspective Divide (perspective distortion)
+			screenSpaceVertex.x /= screenSpaceVertex.w;
+			screenSpaceVertex.y /= screenSpaceVertex.w;
+			screenSpaceVertex.z /= screenSpaceVertex.w;
 
 			mesh.vertices_out.emplace_back(screenSpaceVertex);
 		}

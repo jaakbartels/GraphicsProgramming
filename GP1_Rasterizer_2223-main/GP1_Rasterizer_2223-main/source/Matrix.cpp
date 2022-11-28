@@ -63,10 +63,10 @@ namespace dae {
 	Vector4 Matrix::TransformPoint(float x, float y, float z, float w) const
 	{
 		return Vector4{
-			data[0].x * x + data[1].x * y + data[2].x * z + data[3].x,
-			data[0].y * x + data[1].y * y + data[2].y * z + data[3].y,
-			data[0].z * x + data[1].z * y + data[2].z * z + data[3].z,
-			data[0].w * x + data[1].w * y + data[2].w * z + data[3].w
+			data[0].x * x + data[1].x * y + data[2].x * z + data[3].x * w,
+			data[0].y * x + data[1].y * y + data[2].y * z + data[3].y * w,
+			data[0].z * x + data[1].z * y + data[2].z * z + data[3].z * w,
+			data[0].w * x + data[1].w * y + data[2].w * z + data[3].w * w
 		};
 	}
 
@@ -159,7 +159,12 @@ namespace dae {
 	{
 		//TODO W2
 
-		return {};
+		return {
+			{1.f/(aspect*fov), 0.f,0.f,0.f},
+			{0.f , 1.f / fov,0.f,0.f},
+			{0.f,0.f, zf / (zf - zn),-(zf*zn)/(zf-zn)},
+			{0.f, 0.f,1.f,0.f},
+		};
 	}
 
 	Vector3 Matrix::GetAxisX() const
