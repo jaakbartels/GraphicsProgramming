@@ -778,10 +778,10 @@ void Renderer::Renderer_W3_01()
 		float bottomRightX = std::max(V0.x, std::max(V1.x, V2.x));
 		float bottomRightY = std::min(V0.y, std::min(V1.y, V2.y));
 
-		topLeftX = Clamp(topLeftX, 1.f, float(m_Width - 1));
-		topLeftY = Clamp(topLeftY, 1.f, float(m_Height - 1));
-		bottomRightX = Clamp(bottomRightX, 1.f, float(m_Width - 1));
-		bottomRightY = Clamp(bottomRightY, 1.f, float(m_Height - 1));
+		topLeftX = Clamp(topLeftX, -1.f, 1.f);
+		topLeftY = Clamp(topLeftY, -1.f, 1.f);
+		bottomRightX = Clamp(bottomRightX, -1.f, 1.f);
+		bottomRightY = Clamp(bottomRightY, -1.f, 1.f);
 
 		//RENDER LOGIC
 		for (int px{ int(topLeftX) }; px < bottomRightX; ++px)
