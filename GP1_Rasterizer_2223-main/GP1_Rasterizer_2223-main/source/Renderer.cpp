@@ -27,7 +27,7 @@ Renderer::Renderer(SDL_Window* pWindow) :
 
 	//Initialize Camera
 	m_Camera.Initialize(60.f, { .0f,.0f,-10.f });
-
+	m_Camera.aspect = (m_Width / m_Height);
 	//initialize Texture
 	//m_pTexture = new Texture{ "Resources/uv_grid_2.png" };
 	m_pTexture = Texture::LoadFromFile("Resources/uv_grid_2.png");
@@ -778,10 +778,11 @@ void Renderer::Renderer_W3_01()
 		float bottomRightX = std::max(V0.x, std::max(V1.x, V2.x));
 		float bottomRightY = std::min(V0.y, std::min(V1.y, V2.y));
 
-		topLeftX = Clamp(topLeftX, -1.f, 1.f);
-		topLeftY = Clamp(topLeftY, -1.f, 1.f);
-		bottomRightX = Clamp(bottomRightX, -1.f, 1.f);
-		bottomRightY = Clamp(bottomRightY, -1.f, 1.f);
+
+		topLeftX = Clamp(topLeftX, 1.f, float(m_Width - 1));
+		topLeftY = Clamp(topLeftY, 1.f, float(m_Height - 1));
+		bottomRightX = Clamp(bottomRightX, 1.f, float(m_Width - 1));
+		bottomRightY = Clamp(bottomRightY, 1.f, float(m_Height - 1));
 
 		//RENDER LOGIC
 		for (int px{ int(topLeftX) }; px < bottomRightX; ++px)
@@ -880,6 +881,10 @@ void Renderer::VertexTransformationFunction(std::vector<Mesh>& meshes) const
 			screenSpaceVertex.x /= screenSpaceVertex.w;
 			screenSpaceVertex.y /= screenSpaceVertex.w;
 			screenSpaceVertex.z /= screenSpaceVertex.w;
+
+			
+			screenSpaceVertex.x = ((screenSpaceVertex.x + 1) / 2.f) * float(m_Width);
+			screenSpaceVertex.y = ((1 - screenSpaceVertex.y) / 2.f) * float(m_Height);
 
 			mesh.vertices_out.emplace_back(screenSpaceVertex);
 		}

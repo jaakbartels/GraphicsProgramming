@@ -24,7 +24,7 @@ namespace dae
 		float fov{ tanf((fovAngle * TO_RADIANS) / 2.f) };
 		float nearPlane{ .1f };
 		float farPlane{ 100.f };
-		float aspect{ 1.0f };
+		float aspect{ 1.f };
 
 		Vector3 forward{ Vector3::UnitZ };
 		Vector3 up{ Vector3::UnitY };
