@@ -27,7 +27,7 @@ Renderer::Renderer(SDL_Window* pWindow) :
 
 	//Initialize Camera
 	m_Camera.Initialize(60.f, { .0f,.0f,-10.f });
-	m_Camera.aspect = (m_Width / m_Height);
+	m_Camera.aspect = (m_Width / float(m_Height));
 	//initialize Texture
 	//m_pTexture = new Texture{ "Resources/uv_grid_2.png" };
 	m_pTexture = Texture::LoadFromFile("Resources/uv_grid_2.png");
