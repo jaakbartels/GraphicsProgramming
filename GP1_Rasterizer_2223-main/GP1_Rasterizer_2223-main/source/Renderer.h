@@ -30,8 +30,11 @@ namespace dae
 
 		void Update(Timer* pTimer);
 		void Render();
+		float Remap(float v, float min, float max) const;
 
 		bool SaveBufferToImage() const;
+		bool ShowDepthBuffer{ false };
+
 
 	private:
 		SDL_Window* m_pWindow{};
@@ -46,6 +49,7 @@ namespace dae
 
 		int m_Width{};
 		int m_Height{};
+
 
 		//W2
 		Texture* m_pTexture;

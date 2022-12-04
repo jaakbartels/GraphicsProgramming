@@ -70,6 +70,13 @@ void Renderer::Render()
 	SDL_UpdateWindowSurface(m_pWindow);
 }
 
+//Remap value v from [min, max] to [0, 1]
+float Renderer::Remap(float v, float min, float max) const
+{
+	float result{ (v - min)/(max - min) };
+	return Clamp(result, 0.f, 1.f);
+}
+
 void Renderer::Renderer_W3_01()
 {
 	std::vector<Mesh> meshes_world
@@ -118,9 +125,9 @@ void Renderer::Renderer_W3_01()
 			}
 		}
 
-		const Vector3 V0{ meshes_world[0].vertices_out[index0].position };
-		const Vector3 V1{ meshes_world[0].vertices_out[index1].position };
-		const Vector3 V2{ meshes_world[0].vertices_out[index2].position };
+		const Vector4 V0{ meshes_world[0].vertices_out[index0].position };
+		const Vector4 V1{ meshes_world[0].vertices_out[index1].position };
+		const Vector4 V2{ meshes_world[0].vertices_out[index2].position };
 
 		float topLeftX = std::min(V0.x, std::min(V1.x, V2.x));
 		float topLeftY = std::max(V0.y, std::max(V1.y, V2.y));
@@ -159,23 +166,37 @@ void Renderer::Renderer_W3_01()
 					const float w1{ signedArea1 / doubleOfTriangleArea };
 
 					const float interpolatedZ{ 1 / ((1 / V0.z) * w0 + (1 / V1.z) * w1 + (1 / V2.z) * w2) };
-					//const float interpolatedW{ 1 / ((1 / V0.w) * w0 + (1 / V1.z) * w1 + (1 / V2.z) * w2) };
 
-					Vector2 interpolatedUV{
-						meshes_world[0].vertices[index0].uv / V0.z * w0
-						+ meshes_world[0].vertices[index1].uv / V1.z * w1
-						+ meshes_world[0].vertices[index2].uv / V2.z * w2 };
+					if (interpolatedZ >= 0.f && interpolatedZ<=1.f && interpolatedZ < m_pDepthBufferPixels[px + (py * m_Width)])
+					{
+						m_pDepthBufferPixels[px + (py * m_Width)] = interpolatedZ;
 
-					interpolatedUV *= interpolatedZ;
+						const float interpolatedW{ 1 / ((1 / V0.w) * w0 + (1 / V1.w) * w1 + (1 / V2.w) * w2) };
 
-					finalColor = { m_pTexture->Sample(interpolatedUV) };
-					//Update Color in Buffer
-					finalColor.MaxToOne();
+						Vector2 interpolatedUV{
+							meshes_world[0].vertices[index0].uv / V0.w * w0
+							+ meshes_world[0].vertices[index1].uv / V1.w * w1
+							+ meshes_world[0].vertices[index2].uv / V2.w * w2 };
 
-					m_pBackBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBackBuffer->format,
-						static_cast<uint8_t>(finalColor.r * 255),
-						static_cast<uint8_t>(finalColor.g * 255),
-						static_cast<uint8_t>(finalColor.b * 255));
+						interpolatedUV *= interpolatedW;
+
+						if (ShowDepthBuffer)
+						{
+							float v = Remap(interpolatedZ, 0.985f, 1.f);
+							finalColor = { v, v, v };
+						}
+						else
+						{
+							finalColor = { m_pTexture->Sample(interpolatedUV) };
+						}
+						//Update Color in Buffer
+						finalColor.MaxToOne();
+
+						m_pBackBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBackBuffer->format,
+							static_cast<uint8_t>(finalColor.r * 255),
+							static_cast<uint8_t>(finalColor.g * 255),
+							static_cast<uint8_t>(finalColor.b * 255));
+					}
 				}
 
 			}
