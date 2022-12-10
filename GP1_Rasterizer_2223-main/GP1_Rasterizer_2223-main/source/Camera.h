@@ -26,6 +26,9 @@ namespace dae
 		float farPlane{ 100.f };
 		float aspect{ 1.f };
 
+		float oldAspect{};
+		float oldFov{  };
+
 		Vector3 forward{ Vector3::UnitZ };
 		Vector3 up{ Vector3::UnitY };
 		Vector3 right{ Vector3::UnitX };
@@ -49,10 +52,10 @@ namespace dae
 		{
 			//TODO W1
 			//ONB => invViewMatrix
-			right = Vector3::Cross(Vector3::UnitY, forward).Normalized();
-			up = Vector3::Cross(forward, right).Normalized();
-			invViewMatrix = Matrix{ {right, 0}, {up, 0},
-				{forward, 0}, {origin, 1} };
+			//right = Vector3::Cross(Vector3::UnitY, forward).Normalized();
+			//up = Vector3::Cross(forward, right).Normalized();
+			//invViewMatrix = Matrix{ {right, 0}, {up, 0},
+			//	{forward, 0}, {origin, 1} };
 
 
 			//Inverse(ONB) => ViewMatrix
@@ -65,7 +68,7 @@ namespace dae
 			};*/
 
 			viewMatrix = Matrix::CreateLookAtLH(origin, forward, up);
-
+			invViewMatrix = Matrix::Inverse(viewMatrix);
 			//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixlookatlh
 		}
 
@@ -83,7 +86,7 @@ namespace dae
 			const float deltaTime = pTimer->GetElapsed();
 
 			//Camera Update Logic
-			const float movementSpeed{ 10 * deltaTime };
+			const float movementSpeed{ 10  };
 			//Keyboard Input
 			//const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
 			const Uint8* pStates{ SDL_GetKeyboardState(nullptr) };
@@ -133,7 +136,13 @@ namespace dae
 
 			//Update Matrices
 			CalculateViewMatrix();
-			CalculateProjectionMatrix(); //Try to optimize this - should only be called once or when fov/aspectRatio changes
+
+			if (oldAspect != aspect || oldFov != fov)
+			{
+				oldAspect = aspect;
+				oldFov = fov;
+				CalculateProjectionMatrix(); //Try to optimize this - should only be called once or when fov/aspectRatio changes
+			}
 		}
 	};
 }

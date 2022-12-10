@@ -22,6 +22,9 @@ namespace dae
 	public:
 		Renderer(SDL_Window* pWindow);
 		~Renderer();
+		void ToggleShowDepthBuffer();
+		void SelectGreen();
+		void SelectRed();
 
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) noexcept = delete;
@@ -35,6 +38,7 @@ namespace dae
 		bool SaveBufferToImage() const;
 		bool ShowDepthBuffer{ false };
 
+		int fromIdx, toIdx;
 
 	private:
 		SDL_Window* m_pWindow{};
@@ -53,6 +57,7 @@ namespace dae
 
 		//W2
 		Texture* m_pTexture;
+		std::vector<Mesh> m_Meshes {};
 
 		//Function that transforms the vertices from the mesh from World space to Screen space
 		void VertexTransformationFunctionW1(const std::vector<Vertex>& vertices_in, std::vector<Vertex>& vertices_out) const; //W1 Version

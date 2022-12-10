@@ -65,9 +65,17 @@ int main(int argc, char* args[])
 				{
 					takeScreenshot = true;
 				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_G)
+				{
+					pRenderer->SelectGreen();
+				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_R)
+				{
+					pRenderer->SelectRed();
+				}
 				if (e.key.keysym.scancode == SDL_SCANCODE_F4)
 				{
-					pRenderer->ShowDepthBuffer ^= true;
+					pRenderer->ToggleShowDepthBuffer();
 				}
 				break;
 			}
@@ -86,6 +94,7 @@ int main(int argc, char* args[])
 		{
 			printTimer = 0.f;
 			std::cout << "dFPS: " << pTimer->GetdFPS() << std::endl;
+			std::cout << "fromIdx: " << pRenderer->fromIdx << ", toIdx: " << pRenderer->toIdx << std::endl;
 		}
 
 		//Save screenshot after full render
