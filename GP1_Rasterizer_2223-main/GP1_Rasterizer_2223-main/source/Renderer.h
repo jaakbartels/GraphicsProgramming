@@ -68,5 +68,7 @@ namespace dae
 		bool IsInTriangle(const Vector2& pixel, const Vector2& a, const Vector2& b, const Vector2& c);
 
 		void Renderer_W4_01(uint32_t fromX, uint32_t fromY, uint32_t toX, uint32_t toY);
+		float Interpolate(float value0, float value1, float value2, float w0, float w1, float w2);
+		Vector3 Interpolate(Vector3 value0, Vector3 value1, Vector3 value2, float w0, float w1, float w2);
 	};
 }

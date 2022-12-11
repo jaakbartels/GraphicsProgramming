@@ -194,11 +194,11 @@ void Renderer::Renderer_W4_01(uint32_t fromX, uint32_t fromY, uint32_t toX, uint
 								Vertex_Out v{};
 								v.uv = interpolatedUV;
 
-								v.normal = V0.normal * w0 + V1.normal * w1 + V2.normal * w2;
+								v.normal = Interpolate(V0.normal, V1.normal, V2.normal , w0, w1,  w2);
 								v.normal.Normalize();
-								v.tangent = V0.tangent * w0 + V1.tangent * w1 + V2.tangent * w2;
+								v.tangent = Interpolate(V0.tangent, V1.tangent, V2.tangent, w0 , w1, w2);
 								v.tangent.Normalize();
-								v.viewDirection = V0.viewDirection * w0 + V1.viewDirection * w1 + V2.viewDirection * w2;
+								v.viewDirection = Interpolate(V0.viewDirection, V1.viewDirection, V2.viewDirection, w0, w1, w2);
 								v.viewDirection.Normalize();
 
 
@@ -219,6 +219,22 @@ void Renderer::Renderer_W4_01(uint32_t fromX, uint32_t fromY, uint32_t toX, uint
 			}
 		}
 	}
+}
+
+float Renderer::Interpolate(float value0, float value1, float value2, float w0, float w1, float w2)
+{
+	//return 1 / ((1 / value0) * w0 + (1 / value1) * w1 + (1 / value2) * w2);
+	return value0 * w0 + value1 * w1 + value2 * w2;
+}
+
+Vector3 Renderer::Interpolate(Vector3 value0, Vector3 value1, Vector3 value2, float w0, float w1, float w2)
+{
+	return
+	{
+		Interpolate(value0.x, value1.x, value2.x, w0,w1,w2),
+		Interpolate(value0.y, value1.y, value2.y, w0,w1,w2),
+		Interpolate(value0.z, value1.z, value2.z, w0,w1,w2)
+	};
 }
 
 void Renderer::VertexTransformationFunction(std::vector<Mesh>& meshes) const
