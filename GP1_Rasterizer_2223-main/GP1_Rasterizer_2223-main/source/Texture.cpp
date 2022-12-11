@@ -3,6 +3,8 @@
 #include <SDL_image.h>
 #include <assert.h>
 
+#include "Vector3.h"
+
 namespace dae
 {
 	Texture::Texture(SDL_Surface* pSurface) :
@@ -55,5 +57,20 @@ namespace dae
 		desiredColor.b /= 255.f;
 
 		return desiredColor;
+	}
+
+	Vector3 Texture::SampleNormal(const Vector2& uv) const
+	{
+		auto valueAsColor = Sample(uv);
+
+		Vector3 value{ 2.f * valueAsColor.r - 1.f , 2.f*valueAsColor.g - 1.f, 2.f*valueAsColor.b - 1.f };
+		return value;
+	}
+
+	float Texture::SampleFloat(const Vector2& uv) const
+	{
+		auto valueAsColor = Sample(uv);
+
+		return valueAsColor.r;
 	}
 }

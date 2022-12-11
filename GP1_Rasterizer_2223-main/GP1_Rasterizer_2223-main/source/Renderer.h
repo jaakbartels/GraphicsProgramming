@@ -23,8 +23,6 @@ namespace dae
 		Renderer(SDL_Window* pWindow);
 		~Renderer();
 		void ToggleShowDepthBuffer();
-		void SelectGreen();
-		void SelectRed();
 
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) noexcept = delete;
@@ -32,13 +30,13 @@ namespace dae
 		Renderer& operator=(Renderer&&) noexcept = delete;
 
 		void Update(Timer* pTimer);
-		void Render();
+		void Render(uint32_t fromX, uint32_t fromY, uint32_t toX, uint32_t toY);
 		float Remap(float v, float min, float max) const;
 
 		bool SaveBufferToImage() const;
+		ColorRGB PixelShading(const Vertex_Out& v);
 		bool ShowDepthBuffer{ false };
-
-		int fromIdx, toIdx;
+		void ToggleRotation();
 
 	private:
 		SDL_Window* m_pWindow{};
@@ -54,9 +52,14 @@ namespace dae
 		int m_Width{};
 		int m_Height{};
 
+		bool m_Rotating{ true };
 
 		//W2
 		Texture* m_pTexture;
+		Texture* m_pNormalMap;
+		Texture* m_pGlossMap;
+		Texture* m_pSpecularMap;
+
 		std::vector<Mesh> m_Meshes {};
 
 		//Function that transforms the vertices from the mesh from World space to Screen space
@@ -64,15 +67,6 @@ namespace dae
 		void VertexTransformationFunction(std::vector<Mesh>& meshes) const;
 		bool IsInTriangle(const Vector2& pixel, const Vector2& a, const Vector2& b, const Vector2& c);
 
-		void Renderer_W1_01();
-		void Renderer_W1_02();
-		void Renderer_W1_03();
-		void Renderer_W1_04();
-		void Renderer_W1_05();
-
-		void Renderer_W2_01();
-		void Renderer_W2_02();
-		void Renderer_W2_03();
-		void Renderer_W3_01();
+		void Renderer_W4_01(uint32_t fromX, uint32_t fromY, uint32_t toX, uint32_t toY);
 	};
 }

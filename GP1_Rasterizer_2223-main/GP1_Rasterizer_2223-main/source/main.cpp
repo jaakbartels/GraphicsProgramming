@@ -31,6 +31,12 @@ int main(int argc, char* args[])
 	const uint32_t width = 640;
 	const uint32_t height = 480;
 
+	//Render area
+	uint32_t fromX{ 0 };
+	uint32_t fromY{ 0 };
+	uint32_t toX{ width };
+	uint32_t toY{ height };
+
 	SDL_Window* pWindow = SDL_CreateWindow(
 		"Rasterizer - W6 DEMO",
 		SDL_WINDOWPOS_UNDEFINED,
@@ -65,17 +71,20 @@ int main(int argc, char* args[])
 				{
 					takeScreenshot = true;
 				}
-				if (e.key.keysym.scancode == SDL_SCANCODE_G)
-				{
-					pRenderer->SelectGreen();
-				}
-				if (e.key.keysym.scancode == SDL_SCANCODE_R)
-				{
-					pRenderer->SelectRed();
-				}
 				if (e.key.keysym.scancode == SDL_SCANCODE_F4)
 				{
 					pRenderer->ToggleShowDepthBuffer();
+				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_F5)
+				{
+					pRenderer->ToggleRotation();
+				}
+				break;
+
+			case SDL_MOUSEBUTTONUP:
+				if (e.button.button == SDL_BUTTON_LEFT)
+				{
+					pRenderer->Render(e.button.x, e.button.y, e.button.x + 1, e.button.y + 1);
 				}
 				break;
 			}
@@ -85,7 +94,7 @@ int main(int argc, char* args[])
 		pRenderer->Update(pTimer);
 
 		//--------- Render ---------
-		pRenderer->Render();
+		pRenderer->Render(fromX, fromY, toX, toY);
 
 		//--------- Timer ---------
 		pTimer->Update();
@@ -94,7 +103,6 @@ int main(int argc, char* args[])
 		{
 			printTimer = 0.f;
 			std::cout << "dFPS: " << pTimer->GetdFPS() << std::endl;
-			std::cout << "fromIdx: " << pRenderer->fromIdx << ", toIdx: " << pRenderer->toIdx << std::endl;
 		}
 
 		//Save screenshot after full render

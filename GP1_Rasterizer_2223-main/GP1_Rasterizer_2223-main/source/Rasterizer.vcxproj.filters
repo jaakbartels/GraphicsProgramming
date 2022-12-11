@@ -47,6 +47,7 @@
     <ClInclude Include="Texture.h">
       <Filter>Misc</Filter>
     </ClInclude>
+    <ClInclude Include="BRDFs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
