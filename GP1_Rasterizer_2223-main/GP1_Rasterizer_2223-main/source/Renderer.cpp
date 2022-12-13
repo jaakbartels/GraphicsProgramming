@@ -198,11 +198,15 @@ void Renderer::Renderer_W4_01(uint32_t fromX, uint32_t fromY, uint32_t toX, uint
 								Vertex_Out v{};
 								v.uv = interpolatedUV;
 
-								v.normal = Interpolate(V0.normal, V1.normal, V2.normal , w0, w1,  w2);
+								float vw0 = pos0.w;
+								float vw1 = pos1.w;
+								float vw2 = pos2.w;
+
+								v.normal = Interpolate(V0.normal, V1.normal, V2.normal, w0, w1, w2, vw0, vw1, vw2,  interpolatedW);
 								v.normal.Normalize();
-								v.tangent = Interpolate(V0.tangent, V1.tangent, V2.tangent, w0 , w1, w2);
+								v.tangent = Interpolate(V0.tangent, V1.tangent, V2.tangent, w0 , w1, w2, vw0, vw1, vw2, interpolatedW);
 								v.tangent.Normalize();
-								v.viewDirection = Interpolate(V0.viewDirection, V1.viewDirection, V2.viewDirection, w0, w1, w2);
+								v.viewDirection = Interpolate(V0.viewDirection, V1.viewDirection, V2.viewDirection, w0, w1, w2, vw0, vw1, vw2, interpolatedW);
 								v.viewDirection.Normalize();
 
 
@@ -225,19 +229,21 @@ void Renderer::Renderer_W4_01(uint32_t fromX, uint32_t fromY, uint32_t toX, uint
 	}
 }
 
-float Renderer::Interpolate(float value0, float value1, float value2, float w0, float w1, float w2)
+float Renderer::Interpolate(float value0, float value1, float value2, float w0, float w1, float w2, float interpolatedW)
 {
 	//return 1 / ((1 / value0) * w0 + (1 / value1) * w1 + (1 / value2) * w2);
-	return value0 * w0 + value1 * w1 + value2 * w2;
+	return value0 * w0 + value1 * w1 + value2 * w2* interpolatedW;
 }
 
-Vector3 Renderer::Interpolate(Vector3 value0, Vector3 value1, Vector3 value2, float w0, float w1, float w2)
+Vector3 Renderer::Interpolate(Vector3 value0, Vector3 value1, Vector3 value2, float w0, float w1, float w2, float vw0, float vw1, float vw2, float interpolatedW)
 {
+	return ((value0 / vw0) * w0 + (value1 / vw1) * w1 + (value2 / vw2) * w2) * interpolatedW;
+
 	return
 	{
-		Interpolate(value0.x, value1.x, value2.x, w0,w1,w2),
-		Interpolate(value0.y, value1.y, value2.y, w0,w1,w2),
-		Interpolate(value0.z, value1.z, value2.z, w0,w1,w2)
+		//Interpolate(value0.x, value1.x, value2.x, w0,w1,w2,interpolatedW) ,
+		//Interpolate(value0.y, value1.y, value2.y, w0,w1,w2,interpolatedW),
+		//Interpolate(value0.z, value1.z, value2.z, w0,w1,w2,interpolatedW)
 	};
 }
 
