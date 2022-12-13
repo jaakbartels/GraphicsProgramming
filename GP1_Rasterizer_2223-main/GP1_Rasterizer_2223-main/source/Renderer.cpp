@@ -319,10 +319,10 @@ ColorRGB Renderer::PixelShading(const Vertex_Out& v)
 		finalColor = lambert * observedArea;
 		break;
 	case Renderer::LightMode::Specular:
-		finalColor = phong;
+		finalColor = phongClamped*specular;
 		break;
 	case Renderer::LightMode::Combined:
-		finalColor = (lambert + phong + ambient) * observedArea;
+		finalColor = (lambert + phongClamped*specular + ambient) * observedArea;
 		break;
 	}
 	return finalColor;
