@@ -36,6 +36,8 @@ Renderer::Renderer(SDL_Window* pWindow) :
 	m_pGlossMap = Texture::LoadFromFile("Resources/vehicle_gloss.png");
 	m_pSpecularMap = Texture::LoadFromFile("Resources/vehicle_specular.png");
 
+	m_LightMode = LightMode::Combined;
+
 	Mesh vehicle{};
 	Utils::ParseOBJ("Resources/vehicle.obj", vehicle.vertices, vehicle.indices);
 	vehicle.primitiveTopology = PrimitiveTopology::TriangleList;
@@ -60,7 +62,9 @@ void Renderer::Update(Timer* pTimer)
 {
 	if (m_Rotating)
 	{
-		m_Meshes[0].worldMatrix = Matrix::CreateRotationY(pTimer->GetTotal() / 5.f * PI) * Matrix::CreateTranslation(0, 0, 50.f);
+		const float rotationSpeed{ 50 * TO_RADIANS * pTimer->GetElapsed() };
+		m_Angle += rotationSpeed;
+		m_Meshes[0].worldMatrix = Matrix::CreateRotationY(m_Angle) * Matrix::CreateTranslation(0, 0, 50.f);
 	}
 	m_Camera.Update(pTimer);
 }
@@ -300,13 +304,42 @@ ColorRGB Renderer::PixelShading(const Vertex_Out& v)
 	auto glossiness =  m_pGlossMap->SampleFloat(v.uv);
 	auto specular = m_pSpecularMap->Sample(v.uv);
 
-	auto phong = BRDF::Phong(2.f, glossiness * shininess, lightDirection, -v.viewDirection, v.normal);
+	auto phong = BRDF::Phong(2.f, glossiness * shininess, lightDirection, -v.viewDirection, normal);
 	ColorRGB phongClamped{ Clamp(phong.r, 0.f, 1.f), Clamp(phong.g, 0.f, 1.f) , Clamp(phong.b, 0.f, 1.f) };
+	auto lambert = BRDF::Lambert(7.f, color);
 
-	return BRDF::Lambert(7.f, color) * observedArea + phongClamped * specular  + ambient;
+
+	ColorRGB finalColor{};
+	switch (m_LightMode)
+	{
+	case Renderer::LightMode::ObservedArea:
+		finalColor = { observedArea, observedArea, observedArea };
+		break;
+	case Renderer::LightMode::Diffuse:
+		finalColor = lambert * observedArea;
+		break;
+	case Renderer::LightMode::Specular:
+		finalColor = phong;
+		break;
+	case Renderer::LightMode::Combined:
+		finalColor = (lambert + phong + ambient) * observedArea;
+		break;
+	}
+	return finalColor;
 }
-
 void Renderer::ToggleRotation()
 {
 	m_Rotating = !m_Rotating;
+}
+void Renderer::ToggleLightMode()
+{
+	if(int(m_LightMode) < 3)
+	{
+		m_LightMode = LightMode(int(m_LightMode) + 1);
+	}
+	else
+	{
+		m_LightMode = LightMode(0);
+	}
+
 }

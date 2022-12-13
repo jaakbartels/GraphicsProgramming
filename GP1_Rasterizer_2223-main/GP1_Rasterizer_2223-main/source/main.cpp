@@ -79,6 +79,10 @@ int main(int argc, char* args[])
 				{
 					pRenderer->ToggleRotation();
 				}
+				if (e.key.keysym.scancode == SDL_SCANCODE_F7)
+				{
+					pRenderer->ToggleLightMode();
+				}
 				break;
 
 			case SDL_MOUSEBUTTONUP:

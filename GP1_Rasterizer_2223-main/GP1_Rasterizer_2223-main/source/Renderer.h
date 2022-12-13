@@ -37,6 +37,7 @@ namespace dae
 		ColorRGB PixelShading(const Vertex_Out& v);
 		bool ShowDepthBuffer{ false };
 		void ToggleRotation();
+		void ToggleLightMode();
 
 	private:
 		SDL_Window* m_pWindow{};
@@ -59,9 +60,17 @@ namespace dae
 		Texture* m_pNormalMap;
 		Texture* m_pGlossMap;
 		Texture* m_pSpecularMap;
-
+		
+		enum class LightMode
+		{
+			ObservedArea,
+			Diffuse,
+			Specular,
+			Combined
+		};
+		LightMode m_LightMode;
 		std::vector<Mesh> m_Meshes {};
-
+		float m_Angle{};
 		//Function that transforms the vertices from the mesh from World space to Screen space
 		void VertexTransformationFunctionW1(const std::vector<Vertex>& vertices_in, std::vector<Vertex>& vertices_out) const; //W1 Version
 		void VertexTransformationFunction(std::vector<Mesh>& meshes) const;
