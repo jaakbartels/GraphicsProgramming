@@ -14,8 +14,8 @@ Effect::Effect(ID3D11Device* pDevice, const std::wstring& assetFile)
 
 Effect::~Effect()
 {
-	m_pEffect->Release();
 	m_pTechnique->Release();
+	m_pEffect->Release();
 }
 
 

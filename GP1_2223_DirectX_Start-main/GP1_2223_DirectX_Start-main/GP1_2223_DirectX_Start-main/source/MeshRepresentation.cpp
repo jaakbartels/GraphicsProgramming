@@ -6,10 +6,8 @@
 #include "Effect.h"
 
 MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex>& vertices, std::vector<int>& indices)
+	: m_Effect { pDevice, L"Resources/PosCol3D.fx" }
 {
-	std::wstring assetFile{L"Resources/PosCol3D.fx"};
-	m_pEffect = new Effect(pDevice, assetFile);
-
 	//Create Vertex Input
 	static constexpr uint32_t numElements{ 2 };
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[numElements]{}; 
@@ -25,7 +23,7 @@ MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex
 
 	//create vertx buffer
 	D3D11_BUFFER_DESC bd = {};
-	bd. Usage = D3D11_USAGE_IMMUTABLE; 
+	bd.Usage = D3D11_USAGE_IMMUTABLE; 
 	bd.ByteWidth = sizeof(Vertex) * static_cast<uint32_t>(vertices.size()); 
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER; 
 	bd.CPUAccessFlags = 0; bd.MiscFlags = 0; 
@@ -36,7 +34,7 @@ MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex
 
 	//Create Input Layout 
 	D3DX11_PASS_DESC passDesc{};
-	m_pEffect->GetTechnique()->GetPassByIndex(0)->GetDesc(&passDesc);
+	m_Effect.GetTechnique()->GetPassByIndex(0)->GetDesc(&passDesc);
 	const HRESULT resultInput = pDevice->CreateInputLayout( 
 		vertexDesc, 
 		numElements, 
@@ -58,7 +56,6 @@ MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex
 
 MeshRepresentation::~MeshRepresentation()
 {
-
 }
 
 void MeshRepresentation::Renderer(ID3D11DeviceContext* pDeviceContext)
@@ -75,10 +72,10 @@ void MeshRepresentation::Renderer(ID3D11DeviceContext* pDeviceContext)
 	pDeviceContext->IASetIndexBuffer(m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	//5. Draw
 	D3DX11_TECHNIQUE_DESC techDesc{};
-	m_pEffect->GetTechnique()->GetDesc(&techDesc);
+	m_Effect.GetTechnique()->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)
 	{
-		m_pEffect->GetTechnique()->GetPassByIndex(p)->Apply(0, pDeviceContext);
+		m_Effect.GetTechnique()->GetPassByIndex(p)->Apply(0, pDeviceContext);
 		pDeviceContext->DrawIndexed(m_NumIndices, 0, 0);
 	}
 }
