@@ -9,7 +9,6 @@ public:
 	~MeshRepresentation();
 	void Renderer(ID3D11DeviceContext* pDeviceContext);
 private:
-	ID3DX11EffectTechnique* m_pTechnique;
 	ID3D11Buffer* m_pVertexBuffer;
 	ID3D11Buffer* m_pIndexBuffer;
 	ID3D11InputLayout* m_pInputLayout;

@@ -7,8 +7,8 @@
 
 MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex>& vertices, std::vector<int>& indices)
 {
-	std::wstring assetFile{};
-	Effect effect(pDevice, assetFile);
+	std::wstring assetFile{L"Resources/PosCol3D.fx"};
+	m_pEffect = new Effect(pDevice, assetFile);
 
 	//Create Vertex Input
 	static constexpr uint32_t numElements{ 2 };
@@ -36,7 +36,7 @@ MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex
 
 	//Create Input Layout 
 	D3DX11_PASS_DESC passDesc{};
-	m_pTechnique->GetPassByIndex(0)->GetDesc(&passDesc); 
+	m_pEffect->GetTechnique()->GetPassByIndex(0)->GetDesc(&passDesc);
 	const HRESULT resultInput = pDevice->CreateInputLayout( 
 		vertexDesc, 
 		numElements, 

@@ -23,7 +23,7 @@ namespace dae {
 		std::vector<Vertex> vertices{
 			{{.0f, .5f, .5f }, {1.f, 0.f, 0.f}},
 			{{.5f, -.5f, .5f }, {0.f, 0.f, 1.f}},
-			{{-.0f, -.5f, .5f }, {0.f, 1.f, 0.f}},
+			{{-.5f, -.5f, .5f }, {0.f, 1.f, 0.f}},
 		};
 
 		std::vector<int> indices{ 0,1,2 };
@@ -173,5 +173,7 @@ namespace dae {
 		viewport.MinDepth = 0.f;
 		viewport.MaxDepth = 1.f;
 		m_pDeviceContext->RSSetViewports(1, &viewport);
+
+		return result;
 	}
 }
