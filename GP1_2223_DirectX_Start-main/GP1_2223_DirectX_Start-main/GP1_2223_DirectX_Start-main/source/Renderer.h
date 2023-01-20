@@ -1,4 +1,5 @@
 #pragma once
+#include "Camera.h"
 #include "MeshRepresentation.h"
 
 struct SDL_Window;
@@ -21,12 +22,22 @@ namespace dae
 		void Render() const;
 
 	private:
+
+		Camera m_Camera;
+
 		SDL_Window* m_pWindow{};
 
 		int m_Width{};
 		int m_Height{};
 
 		bool m_IsInitialized{ false };
+
+		bool m_EnableRotating{ true };
+
+		// CycleFilteringMethod
+		bool m_F2Held{ false };
+		// ToggleRotation
+		bool m_F5Held{ false };
 
 		//DIRECTX
 		HRESULT InitializeDirectX();

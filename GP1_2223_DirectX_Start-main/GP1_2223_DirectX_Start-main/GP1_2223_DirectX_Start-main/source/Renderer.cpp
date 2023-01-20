@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Renderer.h"
 #include "MeshRepresentation.h"
+#include "Utils.h"
+
 namespace dae {
 
 	Renderer::Renderer(SDL_Window* pWindow) :
@@ -20,18 +22,24 @@ namespace dae {
 		{
 			std::cout << "DirectX initialization failed!\n";
 		}
-		std::vector<Vertex> vertices{
-			{{.0f, .5f, .5f }, {1.f, 0.f, 0.f}},
-			{{.5f, -.5f, .5f }, {0.f, 0.f, 1.f}},
-			{{-.5f, -.5f, .5f }, {0.f, 1.f, 0.f}},
-		};
 
-		std::vector<int> indices{ 0,1,2 };
+		m_Camera.Initialize(45.f, { 0.f,0.f,-50.f });
+
+		//std::vector<Vertex> vertices{
+		//	{{.0f, .5f, .5f }, {1.f, 0.f, 0.f}},
+		//	{{.5f, -.5f, .5f }, {0.f, 0.f, 1.f}},
+		//	{{-.5f, -.5f, .5f }, {0.f, 1.f, 0.f}},
+		//};
+		std::vector<Vertex> vertices;
+		std::vector<uint32_t> indices;
+		Utils::ParseOBJ("Resources/vehicle.obj", vertices, indices);
 		m_pMeshRepresentation = new MeshRepresentation(m_pDevice, vertices, indices);
 	}
 
 	Renderer::~Renderer()
 	{
+		delete m_pMeshRepresentation;
+
 		if (m_pRenderTargetView) m_pRenderTargetView->Release();
 		if (m_pRenderTargetBuffer) m_pRenderTargetBuffer->Release();
 		if (m_pDepthStencilView) m_pDepthStencilView->Release();
@@ -44,13 +52,39 @@ namespace dae {
 			m_pDeviceContext->Release();
 		}
 		if (m_pDevice) m_pDevice->Release();
-		delete m_pMeshRepresentation;
-		//Fix hidden DXGIFactory leak
+		
 	}
 
 	void Renderer::Update(const Timer* pTimer)
 	{
+		m_Camera.Update(pTimer);
 
+
+		constexpr const float rotationSpeed{ 30.f };
+		if (m_EnableRotating) m_pMeshRepresentation->RotateY(rotationSpeed * TO_RADIANS * pTimer->GetElapsed());
+		m_pMeshRepresentation->Update(m_Camera.GetWorldViewProjection(), m_Camera.GetInvViewMatrix());
+
+		const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
+
+		if (pKeyboardState[SDL_SCANCODE_F2])
+		{
+			if (!m_F2Held)
+			{
+				m_pMeshRepresentation->CycleFilteringMethods();
+			}
+			m_F2Held = true;
+		}
+		else m_F2Held = false;
+		if (pKeyboardState[SDL_SCANCODE_F5])
+		{
+			if (!m_F5Held)
+			{
+				m_EnableRotating = !m_EnableRotating;
+				
+			}
+			m_F5Held = true;
+		}
+		else m_F5Held = false;
 	}
 
 

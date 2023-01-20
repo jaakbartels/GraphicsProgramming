@@ -9,7 +9,7 @@ namespace dae
 		//Just parses vertices and indices
 #pragma warning(push)
 #pragma warning(disable : 4505) //Warning unreferenced local function
-		static bool ParseOBJ(const std::string& filename, std::vector<Vertex_In>& vertices, std::vector<uint32_t>& indices, bool flipAxisAndWinding = true)
+		static bool ParseOBJ(const std::string& filename, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, bool flipAxisAndWinding = true)
 		{
 			std::ifstream file(filename);
 			if (!file)
@@ -43,7 +43,7 @@ namespace dae
 				}
 				else if (sCommand == "vt")
 				{
-					// Vertex TexCoord
+					// Vertex UV
 					float u, v;
 					file >> u >> v;
 					UVs.emplace_back(u, 1 - v);
@@ -64,8 +64,8 @@ namespace dae
 					//add the material index as attibute to the attribute array
 					//
 					// Faces or triangles
-					Vertex_In vertex{};
-					size_t iPosition, iTexCoord, iNormal;
+					Vertex vertex{};
+					size_t iPosition, iUV, iNormal;
 
 					uint32_t tempIndices[3];
 					for (size_t iFace = 0; iFace < 3; iFace++)
@@ -81,8 +81,8 @@ namespace dae
 							if ('/' != file.peek())
 							{
 								// Optional texture coordinate
-								file >> iTexCoord;
-								vertex.uv = UVs[iTexCoord - 1];
+								file >> iUV;
+								vertex.uv = UVs[iUV - 1];
 							}
 
 							if ('/' == file.peek())

@@ -49,6 +49,12 @@
     <ClInclude Include="DataTypes.h">
       <Filter>MyClasses</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>MyClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>MyClasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -73,6 +79,9 @@
       <Filter>MyClasses</Filter>
     </ClCompile>
     <ClCompile Include="MeshRepresentation.cpp">
+      <Filter>MyClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
       <Filter>MyClasses</Filter>
     </ClCompile>
   </ItemGroup>
