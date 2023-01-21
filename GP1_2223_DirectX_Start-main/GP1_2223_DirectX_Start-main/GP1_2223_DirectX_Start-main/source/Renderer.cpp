@@ -91,7 +91,10 @@ namespace dae {
 		{
 			if (!m_F2Held)
 			{
-				//m_pMeshRepresentation->CycleFilteringMethods();
+				for (auto& m : m_Meshes)
+				{
+					m->CycleFilteringMethods();
+				}
 			}
 			m_F2Held = true;
 		}

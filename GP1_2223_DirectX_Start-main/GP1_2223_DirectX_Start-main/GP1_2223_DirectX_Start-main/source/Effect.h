@@ -25,6 +25,13 @@ public:
 	void SetWorldViewProjectionMatrix(const dae::Matrix& matrix);
 	void SetInverseViewMatrix(const dae::Matrix& matrix);
 
+	void CycleFilteringMethods();
+
+	enum class FilteringMethod
+	{
+		Point, Linear, Anisotropic, END
+	};
+
 protected:
 	ID3DX11Effect* m_pEffect;
 	ID3DX11EffectTechnique* m_pTechnique;
@@ -35,4 +42,7 @@ protected:
 	ID3DX11EffectMatrixVariable* m_pWorldVariable{};
 
 	static ID3DX11Effect* LoadEffect(ID3D11Device* pDevice, const std::wstring& assetFile);
+
+	FilteringMethod m_FilteringMethod;
+
 };

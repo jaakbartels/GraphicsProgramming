@@ -104,6 +104,11 @@ void MeshRepresentation::Render(ID3D11DeviceContext* pDeviceContext)
 	
 }
 
+void MeshRepresentation::CycleFilteringMethods()
+{
+	m_pEffect->CycleFilteringMethods();
+}
+
 void MeshRepresentation::Update(const Matrix& viewProjectionMatrix, const Matrix& inverseViewMatrix)
 {
 	Matrix world{ m_ScaleMatrix * m_RotationMatrix * m_TranslationMatrix };

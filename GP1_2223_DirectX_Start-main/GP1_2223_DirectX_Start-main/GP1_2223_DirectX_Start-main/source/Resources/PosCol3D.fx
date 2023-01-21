@@ -35,6 +35,28 @@ SamplerState gSamStateAnisotropic : SampleState
     AddressV = Wrap; // or Mirror, Clamp, Border
 };
 
+// States
+RasterizerState gRasterizerState
+{
+    CullMode = back;
+    FrontCounterClockwise = false; // default
+};
+
+BlendState gBlendState
+{
+    BlendEnable[0] = false;
+    RenderTargetWriteMask[0] = 0x0F;
+};
+
+DepthStencilState gDepthStencilState
+{
+    DepthEnable = true;
+    DepthWriteMask = 1;
+    DepthFunc = less;
+    StencilEnable = false;
+};
+
+
 // -----------------------------------------------------
 // Input/Output structs
 // -----------------------------------------------------
@@ -132,6 +154,9 @@ technique11 PointFilteringTechnique
 {
     pass P0
     {
+        SetRasterizerState(gRasterizerState);
+        SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
+        SetDepthStencilState(gDepthStencilState, 0);
         SetVertexShader(CompileShader(vs_5_0, VS()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PS_Point()));
@@ -142,6 +167,9 @@ technique11 LinearFilteringTechnique
 {
     pass P0
     {
+        SetRasterizerState(gRasterizerState);
+        SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
+        SetDepthStencilState(gDepthStencilState, 0);
         SetVertexShader(CompileShader(vs_5_0, VS()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PS_Linear()));
@@ -152,6 +180,9 @@ technique11 AnisotropicFilteringTechnique
 {
     pass P0
     {
+        SetRasterizerState(gRasterizerState);
+        SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
+        SetDepthStencilState(gDepthStencilState, 0);
         SetVertexShader(CompileShader(vs_5_0, VS()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PS_Anisotropic()));

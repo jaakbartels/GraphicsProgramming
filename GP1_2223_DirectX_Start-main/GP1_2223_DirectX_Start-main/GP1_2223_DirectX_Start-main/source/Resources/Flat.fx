@@ -31,6 +31,50 @@ SamplerState gSamStateAnisotropic : SampleState
     AddressV = Wrap; // or Mirror, Clamp, Border
 };
 
+RasterizerState gRasterizerState
+{
+    CullMode = none;
+    FrontCounterClockwise = false;
+};
+
+BlendState gBlendState
+{
+    BlendEnable[0] = true;
+    SrcBlend = src_alpha;
+    DestBlend = inv_src_alpha;
+    BlendOp = add;
+    SrcBlendAlpha = zero;
+    DestBlendAlpha = zero;
+    BlendOpAlpha = add;
+    RenderTargetWriteMask[0] = 0x0F;
+};
+
+DepthStencilState gDepthStencilState
+{
+    DepthEnable = true;
+    DepthWriteMask = zero;
+    DepthFunc = less;
+    StencilEnable = false;
+
+    //others are redundant because
+    // StencilEnable is FALSE
+    //(for demo purposes only)
+    StencilReadMask = 0x0F;
+    StencilWriteMask = 0x0F;
+
+    FrontFaceStencilFunc = always;
+    BackFaceStencilFunc = always;
+
+    FrontFaceStencilDepthFail = keep;
+    BackFaceStencilDepthFail = keep;
+
+    FrontFaceStencilPass = keep;
+    BackFaceStencilPass = keep;
+
+    FrontFaceStencilFail = keep;
+    BackFaceStencilFail = keep;
+};
+
 // -----------------------------------------------------
 // Input/Output structs
 // -----------------------------------------------------
@@ -103,6 +147,9 @@ technique11 PointFilteringTechnique
 {
     pass P0
     {
+        SetRasterizerState(gRasterizerState);
+        SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
+        SetDepthStencilState(gDepthStencilState, 0);
         SetVertexShader(CompileShader(vs_5_0, VS()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PS_Point()));
@@ -113,6 +160,9 @@ technique11 LinearFilteringTechnique
 {
     pass P0
     {
+        SetRasterizerState(gRasterizerState);
+        SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
+        SetDepthStencilState(gDepthStencilState, 0);
         SetVertexShader(CompileShader(vs_5_0, VS()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PS_Linear()));
@@ -123,6 +173,9 @@ technique11 AnisotropicFilteringTechnique
 {
     pass P0
     {
+        SetRasterizerState(gRasterizerState);
+        SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
+        SetDepthStencilState(gDepthStencilState, 0);
         SetVertexShader(CompileShader(vs_5_0, VS()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PS_Anisotropic()));

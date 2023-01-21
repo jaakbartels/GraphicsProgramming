@@ -44,6 +44,7 @@ Effect::Effect(ID3D11Device* pDevice, const std::wstring& assetFile)
 
 }
 
+
 Effect::~Effect()
 {
 	m_pTechnique->Release();
@@ -133,3 +134,29 @@ ID3DX11Effect* Effect::LoadEffect(ID3D11Device* pDevice, const std::wstring& ass
 	return pEffect;
 }
 
+
+void Effect::CycleFilteringMethods()
+{
+
+	m_FilteringMethod = static_cast<FilteringMethod>((static_cast<int>(m_FilteringMethod) + 1) % (static_cast<int>(FilteringMethod::END)));
+
+	std::cout << "filter method ";
+	switch (m_FilteringMethod)
+	{
+	case FilteringMethod::Point:
+		m_pTechnique = m_pEffect->GetTechniqueByName("PointFilteringTechnique");
+		if (!m_pTechnique->IsValid()) std::wcout << L"PointTechnique not valid\n";
+		std::cout << "Point\n";
+		break;
+	case FilteringMethod::Linear:
+		m_pTechnique = m_pEffect->GetTechniqueByName("LinearFilteringTechnique");
+		if (!m_pTechnique->IsValid()) std::wcout << L"LinearTechnique not valid\n";
+		std::cout << "Linear\n";
+		break;
+	case FilteringMethod::Anisotropic:
+		m_pTechnique = m_pEffect->GetTechniqueByName("AnisotropicFilteringTechnique");
+		if (!m_pTechnique->IsValid()) std::wcout << L"AnisotropicTechnique not valid\n";
+		std::cout << "Anisotropic\n";
+		break;
+	}
+}
