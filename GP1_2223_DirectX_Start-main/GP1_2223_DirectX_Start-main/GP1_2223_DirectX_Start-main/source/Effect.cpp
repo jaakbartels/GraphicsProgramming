@@ -167,7 +167,7 @@ void Effect::SetWorldViewProjectionMatrix(const dae::Matrix& matrix)
 
 void Effect::SetInverseViewMatrix(const dae::Matrix& matrix)
 {
-	m_pWorldVariable->SetMatrix(reinterpret_cast<const float*>(&matrix));
+	m_pViewInvVariable->SetMatrix(reinterpret_cast<const float*>(&matrix));
 }
 
 void Effect::SetWorldMatrix(const dae::Matrix& matrix)

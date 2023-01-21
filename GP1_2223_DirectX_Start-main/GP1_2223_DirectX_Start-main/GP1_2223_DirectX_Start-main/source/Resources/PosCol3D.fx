@@ -65,7 +65,7 @@ float4 CalculateLambert(float kd, float4 cd)
 
 float CalculatePhong(float ks, float exp, float3 l, float3 v, float3 n)
 {
-    const float3 reflectVec = reflect(l, n);
+	const float3 reflectVec = l - 2 * dot(n,l) * n ;
     const float alfa = saturate(dot(reflectVec, v));
     float phong = 0;
     if (alfa > 0)
@@ -105,7 +105,7 @@ float4 PS_Phong(VS_OUTPUT input, SamplerState state) : SV_TARGET
     const float observedArea = saturate(dot(normal, -gLightDirection));
     const float4 lambert = CalculateLambert(1.0f, DiffuseMap.Sample(state, input.UV));
     const float specularExp = gShininess * GlossinessMap.Sample(state, input.UV).r;
-    const float4 specular = SpecularMap.Sample(state, input.UV) * CalculatePhong(1.0f, specularExp, -gLightDirection, viewDirection, input.Normal);
+    const float4 specular = SpecularMap.Sample(state, input.UV) * CalculatePhong(1.0f, specularExp, -gLightDirection, viewDirection, normal);
 
     return (gLightIntensity * lambert + specular) * observedArea;
 }
