@@ -3,14 +3,12 @@
 #include "Texture.h"
 #include <cassert>
 #include "Camera.h"
-#include "Effect.h"
+#include "ShadingEffect.h"
+#include "Utils.h"
 
-MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
-	: m_pEffect{ std::make_unique<Effect>(pDevice, L"Resources/PosCol3D.fx") }
-	, m_pDiffuseTexture{ std::make_unique<dae::Texture>("Resources/vehicle_diffuse.png", pDevice) }
-	, m_pNormalTexture{ std::make_unique<dae::Texture>("Resources/vehicle_normal.png", pDevice) }
-	, m_pSpecularTexture{ std::make_unique<dae::Texture>("Resources/vehicle_specular.png", pDevice) }
-, m_pGlossinessTexture{ std::make_unique < dae:: Texture > ("Resources/vehicle_gloss.png", pDevice) }
+
+MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, const std::string& name, std::unique_ptr<Effect> pEffect)
+	: m_pEffect{ std::move(pEffect) }
 {
 	//Create Vertex Input
 	static constexpr uint32_t numElements{ 4 };
@@ -35,6 +33,13 @@ MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex
 	vertexDesc[3].AlignedByteOffset = 32;
 	vertexDesc[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
+	if (!Utils::ParseOBJ(name, vertices, indices))
+	{
+		std::cout << "Can't read and parse OBJ file " << name << '\n';
+	}
+
 	//create vertx buffer
 	D3D11_BUFFER_DESC bd = {};
 	bd.Usage = D3D11_USAGE_IMMUTABLE; 
@@ -57,7 +62,7 @@ MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex
 		&m_pInputLayout); 
 	if (FAILED(resultInput)) return; //or return
 
-//Create Index Buffer
+	//Create Index Buffer
 	m_NumIndices = static_cast<uint32_t>(indices.size());
 	bd.Usage = D3D11_USAGE_IMMUTABLE;
 	bd.ByteWidth = sizeof(uint32_t) * m_NumIndices;
@@ -66,11 +71,6 @@ MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex
 	initData.pSysMem = indices.data();
 	result = pDevice->CreateBuffer(&bd, &initData, &m_pIndexBuffer);
 	if (FAILED(resultInput)) return;
-
-	m_pEffect->SetDiffuseMap(m_pDiffuseTexture.get());
-	m_pEffect->SetNormalMap(m_pNormalTexture.get());
-	m_pEffect->SetSpecularMap(m_pSpecularTexture.get());
-	m_pEffect->SetGlossinessMap(m_pGlossinessTexture.get());
 }
 
 MeshRepresentation::~MeshRepresentation()
@@ -81,7 +81,7 @@ MeshRepresentation::~MeshRepresentation()
 
 }
 
-void MeshRepresentation::Renderer(ID3D11DeviceContext* pDeviceContext)
+void MeshRepresentation::Render(ID3D11DeviceContext* pDeviceContext)
 {
 	//1. Set Primitive Topology
 	pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -104,11 +104,6 @@ void MeshRepresentation::Renderer(ID3D11DeviceContext* pDeviceContext)
 	
 }
 
-void MeshRepresentation::CycleFilteringMethods()
-{
-	m_pEffect->CycleFilteringMethods();
-}
-
 void MeshRepresentation::Update(const Matrix& viewProjectionMatrix, const Matrix& inverseViewMatrix)
 {
 	Matrix world{ m_ScaleMatrix * m_RotationMatrix * m_TranslationMatrix };
@@ -116,9 +111,6 @@ void MeshRepresentation::Update(const Matrix& viewProjectionMatrix, const Matrix
 	m_pEffect->SetInverseViewMatrix(inverseViewMatrix);
 	m_pEffect->SetWorldMatrix(world);
 }
-
-
-
 
 void MeshRepresentation::RotateX(float angle)
 {

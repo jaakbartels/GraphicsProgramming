@@ -1,6 +1,13 @@
 #include "pch.h"
+
 #include "Effect.h"
 
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#include <iostream>
+#include <sstream>
+
+#include "Matrix.h"
 
 Effect::Effect(ID3D11Device* pDevice, const std::wstring& assetFile)
 {
@@ -29,39 +36,41 @@ Effect::Effect(ID3D11Device* pDevice, const std::wstring& assetFile)
 		std::wcout << L"m_pWorldVariable not valid!\n";
 	}
 
-
-
-
-
-	m_pNormalMapVariable = m_pEffect->GetVariableByName("NormalMap")->AsShaderResource();
-	if (!m_pNormalMapVariable->IsValid())
-	{
-		std::wcout << L"m_pNormalMapVariable not valid!\n";
-	}
-
 	m_pDiffuseMapVariable = m_pEffect->GetVariableByName("DiffuseMap")->AsShaderResource();
 	if (!m_pDiffuseMapVariable->IsValid())
 	{
 		std::wcout << L"m_pDiffuseMapVariable not valid!\n";
 	}
 
-	m_pGlossinessMapVariable = m_pEffect->GetVariableByName("GlossinessMap")->AsShaderResource();
-	if (!m_pGlossinessMapVariable->IsValid())
-	{
-		std::wcout << L"m_pGlossinessMapVariable not valid!\n";
-	}
-
-	m_pSpecularMapVariable = m_pEffect->GetVariableByName("SpecularMap")->AsShaderResource();
-	if (!m_pSpecularMapVariable->IsValid())
-	{
-		std::wcout << L"m_pSpecularMapVariable not valid!\n";
-	}
 }
 
 Effect::~Effect()
 {
 	m_pTechnique->Release();
 	m_pEffect->Release();
+}
+
+void Effect::SetWorldViewProjectionMatrix(const dae::Matrix& matrix)
+{
+	m_pMatrixWorldViewProjVariable->SetMatrix(reinterpret_cast<const float*>(&matrix));
+}
+
+void Effect::SetInverseViewMatrix(const dae::Matrix& matrix)
+{
+	m_pViewInvVariable->SetMatrix(reinterpret_cast<const float*>(&matrix));
+}
+
+void Effect::SetWorldMatrix(const dae::Matrix& matrix)
+{
+	m_pWorldVariable->SetMatrix(reinterpret_cast<const float*>(&matrix));
+}
+
+void Effect::SetDiffuseMap(dae::Texture* pDiffuseTexture)
+{
+	if (m_pDiffuseMapVariable)
+	{
+		m_pDiffuseMapVariable->SetResource(pDiffuseTexture->GetShaderResourceView());
+	}
 }
 
 
@@ -75,7 +84,6 @@ ID3DX11EffectTechnique* Effect::GetTechnique()
 	return m_pTechnique;
 }
 
-
 ID3DX11Effect* Effect::LoadEffect(ID3D11Device* pDevice, const std::wstring& assetFile)
 {
 	HRESULT result;
@@ -83,7 +91,7 @@ ID3DX11Effect* Effect::LoadEffect(ID3D11Device* pDevice, const std::wstring& ass
 	ID3DX11Effect* pEffect;
 	DWORD shaderFlags = 0;
 
-	
+
 
 #if defined( DEBUG ) || defined( _DEBUG )
 	shaderFlags |= D3DCOMPILE_DEBUG;
@@ -121,83 +129,7 @@ ID3DX11Effect* Effect::LoadEffect(ID3D11Device* pDevice, const std::wstring& ass
 			return nullptr;
 		}
 	}
-	
+
 	return pEffect;
 }
 
-
-
-void Effect::SetSpecularMap(dae::Texture* pSpecularTexture)
-{
-	if (m_pSpecularMapVariable)
-	{
-		m_pSpecularMapVariable->SetResource(pSpecularTexture->GetShaderResourceView());
-	}
-}
-
-void Effect::SetNormalMap(dae::Texture* pNormalTexture)
-{
-	if (m_pNormalMapVariable)
-	{
-		m_pNormalMapVariable->SetResource(pNormalTexture->GetShaderResourceView());
-	}
-}
-
-
-void Effect::SetGlossinessMap(dae::Texture* pGlossinessTexture)
-{
-	if (m_pGlossinessMapVariable)
-	{
-		m_pGlossinessMapVariable->SetResource(pGlossinessTexture->GetShaderResourceView());
-	}
-}
-
-void Effect::SetDiffuseMap(dae::Texture* pDiffuseTexture)
-{
-	if (m_pDiffuseMapVariable)
-	{
-		m_pDiffuseMapVariable->SetResource(pDiffuseTexture->GetShaderResourceView());
-	}
-}
-
-void Effect::SetWorldViewProjectionMatrix(const dae::Matrix& matrix)
-{
-	m_pMatrixWorldViewProjVariable->SetMatrix(reinterpret_cast<const float*>(&matrix));
-}
-
-void Effect::SetInverseViewMatrix(const dae::Matrix& matrix)
-{
-	m_pViewInvVariable->SetMatrix(reinterpret_cast<const float*>(&matrix));
-}
-
-void Effect::SetWorldMatrix(const dae::Matrix& matrix)
-{
-	m_pWorldVariable->SetMatrix(reinterpret_cast<const float*>(&matrix));
-}
-
-
-void Effect::CycleFilteringMethods()
-{
-
-	m_FilteringMethod = static_cast<FilteringMethod>((static_cast<int>(m_FilteringMethod) + 1) % (static_cast<int>(FilteringMethod::END)));
-
-	std::cout << "filter method ";
-	switch (m_FilteringMethod)
-	{
-	case Effect::FilteringMethod::Point:
-		m_pTechnique = m_pEffect->GetTechniqueByName("PointFilteringTechnique");
-		if (!m_pTechnique->IsValid()) std::wcout << L"PointTechnique not valid\n";
-		std::cout << "Point\n";
-		break;
-	case Effect::FilteringMethod::Linear:
-		m_pTechnique = m_pEffect->GetTechniqueByName("LinearFilteringTechnique");
-		if (!m_pTechnique->IsValid()) std::wcout << L"LinearTechnique not valid\n";
-		std::cout << "Linear\n";
-		break;
-	case Effect::FilteringMethod::Anisotropic:
-		m_pTechnique = m_pEffect->GetTechniqueByName("AnisotropicFilteringTechnique");
-		if (!m_pTechnique->IsValid()) std::wcout << L"AnisotropicTechnique not valid\n";
-		std::cout << "Anisotropic\n";
-		break;
-	}
-}

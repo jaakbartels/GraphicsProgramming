@@ -1,12 +1,14 @@
 #include "pch.h"
 #include "Renderer.h"
 #include "MeshRepresentation.h"
+#include "ShadingEffect.h"
 #include "Utils.h"
 
 namespace dae {
 
-	Renderer::Renderer(SDL_Window* pWindow) :
-		m_pWindow(pWindow)
+	Renderer::Renderer(SDL_Window* pWindow)
+		: m_pWindow(pWindow)
+		, m_Meshes()
 	{
 		//Initialize
 		SDL_GetWindowSize(pWindow, &m_Width, &m_Height);
@@ -30,15 +32,28 @@ namespace dae {
 		//	{{.5f, -.5f, .5f }, {0.f, 0.f, 1.f}},
 		//	{{-.5f, -.5f, .5f }, {0.f, 1.f, 0.f}},
 		//};
-		std::vector<Vertex> vertices;
-		std::vector<uint32_t> indices;
-		Utils::ParseOBJ("Resources/vehicle.obj", vertices, indices);
-		m_pMeshRepresentation = new MeshRepresentation(m_pDevice, vertices, indices);
+
+
+		auto pShadingEffect{ std::make_unique<ShadingEffect>(m_pDevice, L"Resources/PosCol3D.fx") };
+
+		pShadingEffect->SetDiffuseMap(std::make_unique<dae::Texture>("Resources/vehicle_diffuse.png", m_pDevice).get());
+		pShadingEffect->SetNormalMap(std::make_unique<dae::Texture>("Resources/vehicle_normal.png", m_pDevice).get());
+		pShadingEffect->SetSpecularMap(std::make_unique<dae::Texture>("Resources/vehicle_specular.png", m_pDevice).get());
+		pShadingEffect->SetGlossinessMap(std::make_unique < dae::Texture >("Resources/vehicle_gloss.png", m_pDevice).get());
+
+		m_Meshes.push_back(new MeshRepresentation(m_pDevice, "Resources/vehicle.obj", std::move(pShadingEffect)));
+
+		auto pFlatEffect{ std::make_unique<Effect>(m_pDevice, L"Resources/Flat.fx") };
+		pFlatEffect->SetDiffuseMap(std::make_unique<dae::Texture>("Resources/fireFX_diffuse.png", m_pDevice).get());
+		m_Meshes.push_back(new MeshRepresentation(m_pDevice, "Resources/fireFX.obj", std::move(pFlatEffect)));
 	}
 
 	Renderer::~Renderer()
 	{
-		delete m_pMeshRepresentation;
+		for (auto& m : m_Meshes)
+		{
+			delete m;
+		}
 
 		if (m_pRenderTargetView) m_pRenderTargetView->Release();
 		if (m_pRenderTargetBuffer) m_pRenderTargetBuffer->Release();
@@ -52,7 +67,7 @@ namespace dae {
 			m_pDeviceContext->Release();
 		}
 		if (m_pDevice) m_pDevice->Release();
-		
+
 	}
 
 	void Renderer::Update(const Timer* pTimer)
@@ -61,8 +76,14 @@ namespace dae {
 
 
 		constexpr const float rotationSpeed{ 30.f };
-		if (m_EnableRotating) m_pMeshRepresentation->RotateY(rotationSpeed * TO_RADIANS * pTimer->GetElapsed());
-		m_pMeshRepresentation->Update(m_Camera.GetWorldViewProjection(), m_Camera.GetInvViewMatrix());
+		for (auto& m : m_Meshes)
+		{
+			if (m_EnableRotating)
+			{
+				m->RotateY(rotationSpeed * TO_RADIANS * pTimer->GetElapsed());
+			}
+			m->Update(m_Camera.GetWorldViewProjection(), m_Camera.GetInvViewMatrix());
+		}
 
 		const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
 
@@ -70,7 +91,7 @@ namespace dae {
 		{
 			if (!m_F2Held)
 			{
-				m_pMeshRepresentation->CycleFilteringMethods();
+				//m_pMeshRepresentation->CycleFilteringMethods();
 			}
 			m_F2Held = true;
 		}
@@ -80,7 +101,7 @@ namespace dae {
 			if (!m_F5Held)
 			{
 				m_EnableRotating = !m_EnableRotating;
-				
+
 			}
 			m_F5Held = true;
 		}
@@ -93,15 +114,18 @@ namespace dae {
 		/*if (!m_IsInitialized)
 			return;*/
 
-		//1. CLEAR RTV & DSV
-		ColorRGB clearColor = ColorRGB{0.f, 0.f, 0.3f}; 
-		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView,&clearColor.r);
+			//1. CLEAR RTV & DSV
+		ColorRGB clearColor = ColorRGB{ 0.f, 0.f, 0.3f };
+		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, &clearColor.r);
 		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 		//2. SET PIPELINE + INVOKE DRAWCALLS (= RENDER)
-		m_pMeshRepresentation->Renderer(m_pDeviceContext);
-		
+		for (auto& m : m_Meshes)
+		{
+			m->Render(m_pDeviceContext);
+		}
+
 		//3. PRESENT BACKBUFFER (SWAP)
-		m_pSwapChain->Present( 0, 0);
+		m_pSwapChain->Present(0, 0);
 
 	}
 
@@ -130,10 +154,10 @@ namespace dae {
 		DXGI_SWAP_CHAIN_DESC swapChainDesc{};
 		swapChainDesc.BufferDesc.Width = m_Width;
 		swapChainDesc.BufferDesc.Height = m_Height;
-		swapChainDesc.BufferDesc.RefreshRate.Numerator = 1; 
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = 1;
 		swapChainDesc.BufferDesc.RefreshRate.Denominator = 60;
 		swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED; 
+		swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 		swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 		swapChainDesc.SampleDesc.Count = 1;
 		swapChainDesc.SampleDesc.Quality = 0;
@@ -144,9 +168,9 @@ namespace dae {
 		swapChainDesc.Flags = 0;
 
 		//Get the handle (HWND) from the SDL Backbuffer
-		SDL_SysWMinfo sysWMInfo{}; 
+		SDL_SysWMinfo sysWMInfo{};
 		SDL_VERSION(&sysWMInfo.version)
-		SDL_GetWindowWMInfo(m_pWindow, &sysWMInfo);
+			SDL_GetWindowWMInfo(m_pWindow, &sysWMInfo);
 		swapChainDesc.OutputWindow = sysWMInfo.info.win.window;
 		//Create SwapChain
 		result = pDxgiFactory->CreateSwapChain(m_pDevice, &swapChainDesc, &m_pSwapChain);
@@ -169,13 +193,13 @@ namespace dae {
 		depthStencilDesc.MiscFlags = 0;
 
 		//View
-		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc{}; 
+		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc{};
 		depthStencilViewDesc.Format = depthStencilDesc.Format;
 		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 		depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-		result = m_pDevice->CreateTexture2D(&depthStencilDesc, nullptr, &m_pDepthStencilBuffer); 
-		if (FAILED(result)) 
+		result = m_pDevice->CreateTexture2D(&depthStencilDesc, nullptr, &m_pDepthStencilBuffer);
+		if (FAILED(result))
 			return result;
 		result = m_pDevice->CreateDepthStencilView(m_pDepthStencilBuffer, &depthStencilViewDesc, &m_pDepthStencilView);
 		if (FAILED(result))

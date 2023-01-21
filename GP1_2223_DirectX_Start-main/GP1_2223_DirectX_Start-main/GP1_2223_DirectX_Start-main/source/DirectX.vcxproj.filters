@@ -40,7 +40,7 @@
       <Filter>Math</Filter>
     </ClInclude>
     <ClInclude Include="Utils.h" />
-    <ClInclude Include="Effect.h">
+    <ClInclude Include="ShadingEffect.h">
       <Filter>MyClasses</Filter>
     </ClInclude>
     <ClInclude Include="MeshRepresentation.h">
@@ -53,6 +53,9 @@
       <Filter>MyClasses</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
+      <Filter>MyClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Effect.h">
       <Filter>MyClasses</Filter>
     </ClInclude>
   </ItemGroup>
@@ -75,13 +78,16 @@
       <Filter>Math</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="Effect.cpp">
+    <ClCompile Include="ShadingEffect.cpp">
       <Filter>MyClasses</Filter>
     </ClCompile>
     <ClCompile Include="MeshRepresentation.cpp">
       <Filter>MyClasses</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
+      <Filter>MyClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="Effect.cpp">
       <Filter>MyClasses</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,17 +1,18 @@
 #pragma once
 #include "DataTypes.h"
+#include "Effect.h"
 
 #include "Texture.h"
 
 
-class Effect;
+class ShadingEffect;
 
 class MeshRepresentation
 {
 public:
-	MeshRepresentation(ID3D11Device* pDevice, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
+	MeshRepresentation(ID3D11Device* pDevice, const std::string& name, std::unique_ptr<Effect> pEffect);
 	~MeshRepresentation();
-	void Renderer(ID3D11DeviceContext* pDeviceContext);
+	void Render(ID3D11DeviceContext* pDeviceContext);
 
 	void CycleFilteringMethods();
 
@@ -33,6 +34,7 @@ private:
 	ID3D11Buffer* m_pIndexBuffer;
 	ID3D11InputLayout* m_pInputLayout;
 	uint32_t m_NumIndices;
+
 	std::unique_ptr<Effect> m_pEffect{};
 	
 
