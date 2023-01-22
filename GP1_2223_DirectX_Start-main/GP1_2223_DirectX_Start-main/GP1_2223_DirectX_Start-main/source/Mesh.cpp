@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "MeshRepresentation.h"
+#include "Mesh.h"
 #include "Texture.h"
 #include <cassert>
 #include "Camera.h"
@@ -7,8 +7,9 @@
 #include "Utils.h"
 
 
-MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, const std::string& name, std::unique_ptr<Effect> pEffect)
+Mesh::Mesh(ID3D11Device* pDevice, const std::string& name, std::unique_ptr<Effect> pEffect, bool supportsSoftwareRenderer)
 	: m_pEffect{ std::move(pEffect) }
+	, SupportSoftwareRenderer(supportsSoftwareRenderer)
 {
 	//Create Vertex Input
 	static constexpr uint32_t numElements{ 4 };
@@ -33,8 +34,6 @@ MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, const std::string&
 	vertexDesc[3].AlignedByteOffset = 32;
 	vertexDesc[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
 	if (!Utils::ParseOBJ(name, vertices, indices))
 	{
 		std::cout << "Can't read and parse OBJ file " << name << '\n';
@@ -73,15 +72,19 @@ MeshRepresentation::MeshRepresentation(ID3D11Device* pDevice, const std::string&
 	if (FAILED(resultInput)) return;
 }
 
-MeshRepresentation::~MeshRepresentation()
+Mesh::~Mesh()
 {
 	m_pIndexBuffer->Release();
 	m_pVertexBuffer->Release();
 	m_pInputLayout->Release();
 
+	delete m_pDiffuseTexture;
+	delete m_pGlossinessTexture;
+	delete m_pNormalTexture;
+	delete m_pSpecularTexture;
 }
 
-void MeshRepresentation::Render(ID3D11DeviceContext* pDeviceContext)
+void Mesh::Render(ID3D11DeviceContext* pDeviceContext)
 {
 	//1. Set Primitive Topology
 	pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -104,28 +107,68 @@ void MeshRepresentation::Render(ID3D11DeviceContext* pDeviceContext)
 	
 }
 
-void MeshRepresentation::CycleFilteringMethods()
+void Mesh::CycleFilteringMethods()
 {
 	m_pEffect->CycleFilteringMethods();
 }
 
-void MeshRepresentation::Update(const Matrix& viewProjectionMatrix, const Matrix& inverseViewMatrix)
+void Mesh::Update(const Matrix& viewProjectionMatrix, const Matrix& inverseViewMatrix)
 {
-	Matrix world{ m_ScaleMatrix * m_RotationMatrix * m_TranslationMatrix };
-	m_pEffect->SetWorldViewProjectionMatrix(world * viewProjectionMatrix);
+	WorldMatrix = { m_ScaleMatrix * m_RotationMatrix * m_TranslationMatrix };
+	m_pEffect->SetWorldViewProjectionMatrix(WorldMatrix * viewProjectionMatrix);
 	m_pEffect->SetInverseViewMatrix(inverseViewMatrix);
-	m_pEffect->SetWorldMatrix(world);
+	m_pEffect->SetWorldMatrix(WorldMatrix);
 }
 
-void MeshRepresentation::RotateX(float angle)
+void Mesh::RotateX(float angle)
 {
 	m_RotationMatrix = Matrix::CreateRotationX(angle) * m_RotationMatrix;
 }
-void MeshRepresentation::RotateY(float angle)
+void Mesh::RotateY(float angle)
 {
 	m_RotationMatrix = Matrix::CreateRotationY(angle) * m_RotationMatrix;
 }
-void MeshRepresentation::RotateZ(float angle)
+void Mesh::RotateZ(float angle)
 {
 	m_RotationMatrix = Matrix::CreateRotationZ(angle) * m_RotationMatrix;
+}
+
+void Mesh::SetDiffuseTexture(Texture* pTexture)
+{
+	m_pDiffuseTexture = pTexture;
+}
+
+void Mesh::SetNormalTexture(Texture* pTexture)
+{
+	m_pNormalTexture = pTexture;
+}
+
+void Mesh::SetSpecularTexture(Texture* pTexture)
+{
+	m_pSpecularTexture = pTexture;
+}
+
+void Mesh::SetGlossinessTexture(Texture* pTexture)
+{
+	m_pGlossinessTexture = pTexture;
+}
+
+Texture* Mesh::GetDiffuseTexture() const
+{
+	return m_pDiffuseTexture;
+}
+
+Texture* Mesh::GetNormalTexture() const
+{
+	return m_pNormalTexture;
+}
+
+Texture* Mesh::GetSpecularTexture() const
+{
+	return m_pSpecularTexture;
+}
+
+Texture* Mesh::GetGlossinessTexture() const
+{
+	return m_pGlossinessTexture;
 }

@@ -79,10 +79,15 @@ namespace dae
 			const float deltaTime = pTimer->GetElapsed();
 
 			//Camera Update Logic
-			const float movementSpeed{ 20  };
+			float movementSpeed{ 20  };
+			float mouseSpeed{ 60  };
 			//Keyboard Input
 			//const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
 			const Uint8* pStates{ SDL_GetKeyboardState(nullptr) };
+			if (pStates[SDL_SCANCODE_LSHIFT])
+			{
+				movementSpeed *= 3;
+			}
 			if (pStates[SDL_SCANCODE_W] || pStates[SDL_SCANCODE_UP])
 			{
 				origin.z += movementSpeed * deltaTime;
@@ -104,23 +109,22 @@ namespace dae
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
 
-			//todo: W2
-			const float rotationSpeed{1/32 };
+			const float rotationSpeed{ 4.f };
 
 			if ((mouseState & SDL_BUTTON(SDL_BUTTON_LEFT)) && (mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT)))
 			{
-				origin.y += -mouseY * movementSpeed;
+				origin.y += -mouseY * mouseSpeed * deltaTime;
 			}
 			else if (mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT))
 			{
-				totalPitch += -mouseY * rotationSpeed;
-				totalYaw += mouseX * rotationSpeed;
+				totalPitch += -mouseY * rotationSpeed * deltaTime;
+				totalYaw += mouseX * rotationSpeed * deltaTime;
 			}
 			else if (mouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
 			{
-				totalYaw += mouseX * rotationSpeed;
+				totalYaw += mouseX * rotationSpeed * deltaTime;
 
-				origin.z += -mouseY * movementSpeed;
+				origin.z += -mouseY * mouseSpeed * deltaTime;
 			}
 
 			const Matrix finalRotation{ Matrix::CreateRotationX(totalPitch) * Matrix::CreateRotationY(totalYaw) };

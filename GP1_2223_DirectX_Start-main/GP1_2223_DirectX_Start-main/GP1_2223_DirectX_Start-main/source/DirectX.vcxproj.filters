@@ -43,7 +43,7 @@
     <ClInclude Include="ShadingEffect.h">
       <Filter>MyClasses</Filter>
     </ClInclude>
-    <ClInclude Include="MeshRepresentation.h">
+    <ClInclude Include="Mesh.h">
       <Filter>MyClasses</Filter>
     </ClInclude>
     <ClInclude Include="DataTypes.h">
@@ -58,6 +58,7 @@
     <ClInclude Include="Effect.h">
       <Filter>MyClasses</Filter>
     </ClInclude>
+    <ClInclude Include="BRDFs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -81,7 +82,7 @@
     <ClCompile Include="ShadingEffect.cpp">
       <Filter>MyClasses</Filter>
     </ClCompile>
-    <ClCompile Include="MeshRepresentation.cpp">
+    <ClCompile Include="Mesh.cpp">
       <Filter>MyClasses</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
