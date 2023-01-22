@@ -15,11 +15,33 @@ void ShutDown(SDL_Window* pWindow)
 	SDL_Quit();
 }
 
+void ShowKeyBindings()
+{
+	std::cout << "[Key Bindings - SHARED]\n";
+	std::cout << "  [F1] Toggle Rasterizer Mode(HARDWARE / SOFTWARE)\n";
+	std::cout << "  [F2]  Toggle Vehicle Rotation(ON / OFF)\n";
+	std::cout << "  [F10] Toggle Uniform ClearColor(ON / OFF)\n";
+	std::cout << "  [F11] Toggle Print FPS(ON / OFF)\n";
+	std::cout << "\n";
+	std::cout << "[Key Bindings - HARDWARE]\n";
+	std::cout << "  [F3] Toggle FireFX(ON / OFF)\n";
+	std::cout << "  [F4] Cycle Sampler State(POINT / LINEAR / ANISOTROPIC)\n";
+	std::cout << "\n";
+	std::cout << "[Key Bindings - SOFTWARE]\n";
+	std::cout << "  [F5] Cycle Shading Mode(COMBINED / OBSERVED_AREA / DIFFUSE / SPECULAR)\n";
+	std::cout << "  [F6] Toggle NormalMap(ON / OFF)\n";
+	std::cout << "  [F7] Toggle DepthBuffer Visualization(ON / OFF)\n";
+	std::cout << "  [F8] Toggle BoundingBox Visualization(ON / OFF)\n";
+	std::cout << "\n";
+}
+
 int main(int argc, char* args[])
 {
 	//Unreferenced parameters
 	(void)argc;
 	(void)args;
+
+	ShowKeyBindings();
 
 	//Create window + surfaces
 	SDL_Init(SDL_INIT_VIDEO);
